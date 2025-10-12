@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+.cursiva{
+   font-family: "Dancing Script", cursive;
+   font-optical-sizing: auto;
+}
+
+.cursiva2{
+  font-family: "Lobster", sans-serif;
+  font-optical-sizing: auto;
+}
+
+body {
+   font-family: "TASA Orbiter", sans-serif;
+  font-optical-sizing: auto;
+}
