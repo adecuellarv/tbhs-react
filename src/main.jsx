@@ -5,10 +5,13 @@ import { store } from './store';
 import './index.css'
 import App from './App.jsx'
 
+const bootstrap = window.__BOOTSTRAP__ || {}
+const baseUrl   = window.__BASE_URL__ || "/"
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-      <App />
+      <App bootstrap={bootstrap} baseUrl={baseUrl}  />
     </Provider>
   </StrictMode>,
 )
