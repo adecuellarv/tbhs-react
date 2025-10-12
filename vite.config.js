@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-   server: {
+  server: {
     port: 5173,
     strictPort: true,
     proxy: {
@@ -17,4 +17,12 @@ export default defineConfig({
     }
   },
   base: '/assets/react/',
+  build: {
+    outDir: 'dist',          // o pon directamente la ruta a /js/react
+    emptyOutDir: true,
+    manifest: true,          // ← IMPORTANTE
+    rollupOptions: {
+      input: '/src/main.jsx' // usa tu entry real (o múltiples entradas)
+    }
+  }
 })

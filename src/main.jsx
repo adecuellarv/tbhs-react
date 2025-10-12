@@ -8,7 +8,7 @@ import App from './App.jsx'
 const bootstrap = window.__BOOTSTRAP__ || {}
 const baseUrl   = window.__BASE_URL__ || "/"
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById('agenda-root')).render(
   <StrictMode>
     <Provider store={store}>
       <App bootstrap={bootstrap} baseUrl={baseUrl}  />
