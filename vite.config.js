@@ -8,14 +8,21 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      '/api': { target: 'http://localhost:8080', changeOrigin: true },
+      // Todo lo que empiece con /api irá a CodeIgniter local
+      '/api': {
+        target: 'http://localhost:8080/tbhs-actions', // <-- CI local
+        changeOrigin: true,
+        secure: false,
+        // Deja /apis/... tal cual, solo quita el prefijo /api
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
     }
   },
   build: {
-    outDir: 'dist',
     manifest: true,
-    rollupOptions: {
-      input: '/src/main.tsx',
-    },
+    outDir: '../projects/assets/react', // o la ruta que uses
+    emptyOutDir: true,
+    rollupOptions: { input: '/src/main.jsx' },
   },
+  base: '/assets/react/',
 })
