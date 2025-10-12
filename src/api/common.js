@@ -1,34 +1,16 @@
+// common.js
 import axios from "axios";
-export const BASE_URL = ''
 
-const env = 'prod'
-export const detectApiBase = () => {
-  // Si la URL actual contiene /tbhs-actions (caso local), úsalo.
-  // Si no, usa raíz (caso QA).
-  if(env === 'local'){
-    return 'http://localhost:8888/tbhs-actions'
-  }
-  if(env === 'dev'){
-    return '/tbhs-actions'
-  }
-  if(env === 'prod'){
-    return 'https://thebesthairsalon.com.mx'
-  }
-  const hasPrefix = window.location.pathname.startsWith("/tbhs-actions/");
-  const prefix = hasPrefix ? "/tbhs-actions" : "https://thebesthairsalon.com.mx";
-  return `${prefix}`; // luego en .get() usa rutas absolutas /apis/...*/
-}
+const isDev = import.meta.env.DEV;
+
+// En dev el baseURL es el prefijo que Vite proxyea.
+// En prod usamos base_url() expuesto desde CI.
+const baseURL = isDev
+  ? '/api/'                              // Vite proxy
+  : (window.__BASE_URL__ || '/');        // mismo origen en prod
 
 export const api = axios.create({
-  baseURL: detectApiBase(),             // mismo origen
+  baseURL,                 // 👆 base coherente por entorno
   withCredentials: true,
   headers: { "X-Requested-With": "XMLHttpRequest" }
 });
-
-
-
-
-///tbhs-actions
-//package-json
-//dev "homepage": "/tbhs-actions",
-//production "homepage": "/chatbot",

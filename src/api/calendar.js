@@ -1,5 +1,5 @@
 import axios from "axios";
-import { api, detectApiBase } from "./common"
+import { api } from "./common"
 
 export const getEmployees = async (data) => {
   try {
