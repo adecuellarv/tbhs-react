@@ -1,16 +1,15 @@
 // common.js
 import axios from "axios";
 
-const isDev = import.meta.env.DEV;
+const isDev = import.meta.env && import.meta.env.DEV;
 
-// En dev el baseURL es el prefijo que Vite proxyea.
-// En prod usamos base_url() expuesto desde CI.
-const baseURL = isDev
-  ? '/api/'                              // Vite proxy
-  : (window.__BASE_URL__ || '/');        // mismo origen en prod
+const prodBase =
+  (typeof window !== 'undefined' && window.__API_BASE__) || // ej: .../tbhs-actions/index.php/
+  (typeof window !== 'undefined' && window.__BASE_URL__)  || // ej: .../tbhs-actions/
+  '/';
 
 export const api = axios.create({
-  baseURL,                 // 👆 base coherente por entorno
+  baseURL: isDev ? '/api/' : prodBase,
   withCredentials: true,
   headers: { "X-Requested-With": "XMLHttpRequest" }
 });
