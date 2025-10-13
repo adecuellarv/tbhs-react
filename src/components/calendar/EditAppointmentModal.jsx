@@ -58,6 +58,7 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
       //setSelectedSlot
       setSelectedSlot({
         start: event?.start,
+        end: event?.end,
         employeeName: event?.employeeName
       })
 
@@ -72,7 +73,8 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
         tiempo_servicio: event?.tiempo,
         costo: Number(event?.costo),
         currency: 'MXN',
-        anticipo: event?.anticipo
+        anticipo: event?.anticipo,
+        serviceDescription: event?.descripcion
       }
       setSelectedServices([service]);
       
@@ -81,12 +83,11 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
     }
   }, [event, clients]);
 
-
   return (
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-30 z-40"
+        className="fixed inset-0 bg-black bg-opacity-30 z-40 opacity-[.6]"
         onClick={onClose}
       />
 
@@ -100,7 +101,7 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <Calendar className="w-5 h-5 text-purple-600" />
+                    <Calendar className="w-5 h-5 text-[#5fba9a]" />
                     <span className="text-sm text-gray-600">{day}</span>
                   </div>
                   <div className="flex items-center space-x-4">
@@ -119,8 +120,11 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
                   <div className="flex items-center space-x-2 text-blue-800">
                     <Clock className="w-4 h-4" />
                     <span className="font-medium text-sm">
-                      {selectedSlot && `${formatTime(selectedSlot.start)}`}
+                      {selectedSlot && `${formatTime(selectedSlot.start)} - ${formatTime(selectedSlot.end)}`}
                     </span>
+                  </div>
+                  <div className="text-xs text-blue-600 mt-1">
+                    <strong>Tiempo: </strong>{event?.tiempo} min
                   </div>
                   <div className="text-xs text-blue-600 mt-1">
                     {selectedSlot?.employeeName}
@@ -154,7 +158,7 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <Calendar className="w-5 h-5 text-purple-600" />
+                    <Calendar className="w-5 h-5 text-[#5fba9a]" />
                     <span className="text-sm text-gray-600">{day}</span>
                   </div>
                   <div className="flex items-center space-x-4">

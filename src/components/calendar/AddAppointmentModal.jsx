@@ -46,8 +46,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
   };
 
   const handleSave = async () => {
-    const formatted = moment(date).format("YYYY-MM-DD");
-
+   const formatted = date.format("YYYY-MM-DD");
     const values = {
       date: formatted,
       startHour: formatTime(selectedSlot.start),
@@ -60,7 +59,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
       comision
     };
 
-    debugger
+
     const resp = await setAppoiment(values);
     if (resp) {
       onSave({
@@ -85,7 +84,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
       {!addClientModal ? (
         <>
           <div
-            className="fixed inset-0 bg-black bg-opacity-30 z-40"
+            className="fixed inset-0 bg-black bg-opacity-30 z-40 opacity-[.6]"
             onClick={onClose}
           />
 
@@ -99,7 +98,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
                   <div className="p-6 border-b border-gray-200">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-2">
-                        <Calendar className="w-5 h-5 text-purple-600" />
+                        <Calendar className="w-5 h-5 text-[#5fba9a]" />
                         <span className="text-sm text-gray-600">{day}</span>
                       </div>
                       <div className="flex items-center space-x-4">
@@ -150,7 +149,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
-                      <Calendar className="w-5 h-5 text-purple-600" />
+                      <Calendar className="w-5 h-5 text-[#5fba9a]" />
                       <span className="text-sm text-gray-600">{day}</span>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -229,7 +228,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
       ) :
         <div>
           <div
-            className="fixed inset-0 bg-black bg-opacity-30 z-40"
+            className="fixed inset-0 bg-black bg-opacity-30 z-40 opacity-[.6]"
             onClick={onClose}
           />
           <div className="fixed top-[50px] right-0 h-full w-[50%] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out p-10">

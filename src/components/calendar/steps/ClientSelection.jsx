@@ -33,10 +33,10 @@ const ClientSelection = ({ onClientSelect, selectedClient, setAddClient, addClie
           className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg border border-dashed border-gray-300"
           onClick={() => setAddClient(true)}
         >
-          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-            <Plus className="w-5 h-5 text-purple-600" />
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <Plus className="w-5 h-5 text-[#165874]" />
           </div>
-          <span className="text-purple-600 font-medium">Añadir un nuevo cliente</span>
+          <span className="text-[#165874] font-medium">Añadir un nuevo cliente</span>
         </button>
 
         {/* Walk-in option */}
@@ -44,8 +44,8 @@ const ClientSelection = ({ onClientSelect, selectedClient, setAddClient, addClie
           onClick={() => onClientSelect({ id: 'walk-in', name: 'Sin cita', email: '' })}
           className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg"
         >
-          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-            <User className="w-5 h-5 text-purple-600" />
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <User className="w-5 h-5 text-[#165874]" />
           </div>
           <span className="font-medium">Sin cita</span>
         </button>}
@@ -57,8 +57,8 @@ const ClientSelection = ({ onClientSelect, selectedClient, setAddClient, addClie
             onClick={() => onClientSelect(client)}
             className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg"
           >
-            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-purple-600 font-semibold">{client.avatar}</span>
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-[#165874] font-semibold">{client.avatar}</span>
             </div>
             <div className="text-left">
               <div className="font-medium capitalize">{client.name}</div>

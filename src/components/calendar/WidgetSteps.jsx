@@ -71,8 +71,8 @@ const WidgetSteps = ({
             onClick={() => setCurrentStep('client')}
             className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg"
           >
-            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-purple-600 font-semibold"><User /></span>
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-[#165874] font-semibold"><User /></span>
             </div>
             <div className="text-left">
               <div className="text-sm text-gray-500">Cliente: </div>
@@ -87,8 +87,8 @@ const WidgetSteps = ({
             className="w-full text-left p-3 hover:bg-gray-50 rounded-lg"
           >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <span className="text-purple-600 font-semibold"><ShoppingBasket /></span>
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-[#165874] font-semibold"><ShoppingBasket /></span>
               </div>
 
               <div className="flex-1">
@@ -99,13 +99,13 @@ const WidgetSteps = ({
                   {selectedServices.map((item, idx) => {
                     const id = item?.id ?? item?.id_servicios_empresa ?? idx;
                     const name = item?.descripcion ?? item?.descripcion ?? `Servicio ${idx + 1}`;
-
+                    const serviceDescription = item?.serviceDescription ? item?.serviceDescription : '';
                     return (
                       <div
                         key={id}
-                        className="group inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm bg-white hover:bg-gray-100"
+                        className="group inline-flex items-center gap-2 rounded-full bg-gray-200 px-3 py-1 text-sm  hover:bg-gray-100"
                       >
-                        <span className="capitalize">{name}</span>
+                        <span className="capitalize">{name} - {serviceDescription}</span>
 
                         {/* Botón eliminar: detenemos el click del botón padre */}
                         {edit &&
@@ -137,8 +137,8 @@ const WidgetSteps = ({
             onClick={() => setCurrentStep('cart')}
             className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg"
           >
-            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-purple-600 font-semibold"><Wallet /></span>
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-[#165874] font-semibold"><Wallet /></span>
             </div>
             <div className="text-left ">
               <div className="text-sm text-gray-500">Total: <strong>${total}</strong></div>
@@ -167,7 +167,7 @@ const WidgetSteps = ({
 
       </div>
       {!edit && (
-        <div className="rounded-lg border p-4 flex flex-col mt-10">
+        <div className="flex flex-col mt-10">
           <button
             type="button"
             onClick={() => advanceAmount ? toast.error('Elimina primero los anticipos') : setOpen(true)}

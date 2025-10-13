@@ -33,7 +33,7 @@ export const getInitials = (fullName = '') => {
 const paletteFor = (cita) => {
   return cita?.tiene_anticipo
     ? { bg: '#bbf7d0', border: '#16a34a' }
-    : { bg: '#a5b4fc', border: '#6366f1' };
+    : { bg: '#165874', border: '#4c7d92' };
 };
 
 export const mapCitaToEvent = (c) => {

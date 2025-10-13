@@ -475,13 +475,14 @@ const CalendarManager = () => {
               </span>
             </div>
           )}
-          eventContent={(arg) => (
+          eventContent={(arg) => {
+            return(
             <div className="p-1 text-sm cursor-pointer">
               <div className="font-medium"><strong>Hora: </strong>{arg.timeText}</div>
-              <div className="truncate"><strong>Servicio: </strong>{arg.event.title}</div>
+              <div className="truncate"><strong>Servicio: </strong>{arg?.event?.title} - {arg?.event?.extendedProps?.descripcion}</div>
 
             </div>
-          )}
+          )}}
           eventClick={handleEventClick}
         />
 
