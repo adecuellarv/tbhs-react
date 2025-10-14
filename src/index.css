@@ -15,3 +15,11 @@ body {
    font-family: "TASA Orbiter", sans-serif;
   font-optical-sizing: auto;
 }
+
+.fc .fc-timegrid-col.fc-day-today{
+  background-color: #dbeafe5e !important;
+}
+
+.past-time-slot{
+  background-color: #f0f0f0 !important; 
+}

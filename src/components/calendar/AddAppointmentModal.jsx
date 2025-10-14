@@ -38,7 +38,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
 
   const handleServiceSelect = (service) => {
     setSelectedServices([...selectedServices, service]);
-    setCurrentStep('cart');
+    setCurrentStep('services-list');
   };
 
   const handleAddMoreServices = () => {
@@ -207,6 +207,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
                     selectedSlot={selectedSlot}
                     onAddMoreServices={handleAddMoreServices}
                     onSave={handleSave}
+                    setCurrentStep={setCurrentStep}
                   />
                 )}
                 {currentStep === 'cart' && (

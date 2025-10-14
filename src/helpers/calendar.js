@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
+import { color } from 'framer-motion';
 
 export const getInitials = (fullName = '') => {
   const name = String(fullName || '').trim();
@@ -32,8 +33,8 @@ export const getInitials = (fullName = '') => {
 
 const paletteFor = (cita) => {
   return cita?.tiene_anticipo
-    ? { bg: '#bbf7d0', border: '#16a34a' }
-    : { bg: '#165874', border: '#4c7d92' };
+    ? { bg: '#648ab5ff', border: '#1653a3ff', color: '#000' }
+    : { bg: '#165874', border: '#4c7d92', color: '#fff '};
 };
 
 export const mapCitaToEvent = (c) => {
@@ -58,7 +59,7 @@ export const mapCitaToEvent = (c) => {
     borderColor: border,
 
     extendedProps: {
-      ...{tiene_anticipo: Boolean(c.tiene_anticipo)},
+      ...{ tiene_anticipo: Boolean(c.tiene_anticipo) },
       ...c
     }
   };
@@ -103,3 +104,20 @@ export const formatDate = (date, format) => {
   const d = dayjs(date).locale('es');
   return d.startOf('day').format(format);
 }
+
+export const getClientById = (clients, id) => clients?.find(c => c?.id === id);
+export const onlyDigits = (str = "") => (str || "").replace(/\D+/g, "");
+export const toMXPhone = (raw = "") => {
+  const digits = onlyDigits(raw);
+  // Si viene a 10 dígitos, le agregamos +52
+  if (digits.length === 10) return `52${digits}`;
+  // Si ya viene con 52, lo respetamos
+  if (digits.startsWith("52")) return digits;
+  return digits; // fallback
+};
+
+export const buildWhatsAppUrl = ({ phone, name, dateText, timeText, service, descripcion }) => {
+  const base = "https://wa.me/";
+  const text = `Hola ${name || ""}, te escribimos para tu cita del ${dateText} a las ${timeText} (${service}${descripcion ? " - " + descripcion : ""}).`;
+  return `${base}${phone}?text=${encodeURIComponent(text)}`;
+};

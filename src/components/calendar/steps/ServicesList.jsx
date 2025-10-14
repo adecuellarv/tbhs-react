@@ -1,14 +1,14 @@
 import React from 'react';
 import { Plus, MoreHorizontal } from 'lucide-react';
 
-const ServicesList = ({ client, services, selectedSlot, onAddMoreServices, onSave, multiple = true }) => {
+const ServicesList = ({ client, services, selectedSlot, onAddMoreServices, onSave, multiple = true, setCurrentStep }) => {
   const total = services.reduce((sum, service) => sum + Number(service.costo), 0);
 
   return (
     <div className="p-4 flex flex-col h-full">
 
       {/* Services */}
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <h3 className="font-semibold mb-4">Servicios</h3>
         <div className="space-y-3">
           {services.map((service, index) => (
@@ -38,6 +38,17 @@ const ServicesList = ({ client, services, selectedSlot, onAddMoreServices, onSav
             <span>Añadir servicio</span>
           </button>
         }
+      </div>
+      <div className=" shadow-md p-4">
+        
+        <div className="flex space-x-3 mt-6">
+          <button
+            onClick={() => setCurrentStep('cart')}
+            className={`flex-1 text-white py-2 px-4 rounded bg-black hover:bg-gray-800 cursor-pointer`}
+          >
+            Continuar
+          </button>
+        </div>
       </div>
     </div>
   );

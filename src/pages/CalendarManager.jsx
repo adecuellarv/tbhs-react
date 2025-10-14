@@ -4,8 +4,8 @@ import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import resourceDayGridPlugin from "@fullcalendar/resource-daygrid";
 import esLocale from "@fullcalendar/core/locales/es";
-import { useDispatch } from 'react-redux'
-import { Plus, ChevronLeft, ChevronRight, Settings, PenIcon } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux'
+import { Plus, ChevronLeft, ChevronRight, Settings, PenIcon, Clock, User as UserIcon, MessageCircle, CircleDollarSign, Scissors } from 'lucide-react';
 import dayjs from 'dayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -16,7 +16,7 @@ import EditAppointmentModal from '../components/calendar/EditAppointmentModal';
 import CalendarSelect from '../components/utils/CalendarSelect';
 import { getEmployees, getAppoinments, getSchedule, getBankTerminals, updateAppointment } from '../api/calendar';
 import { getClients } from '../api/clients';
-import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP } from '../helpers/calendar';
+import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, getClientById, onlyDigits, toMXPhone, buildWhatsAppUrl } from '../helpers/calendar';
 import { setClientsList, setTerminals } from '../store/clientsSlice';
 
 import 'dayjs/locale/es';
@@ -39,6 +39,7 @@ const CalendarManager = () => {
   const [selectHoraFin, setSelectHoraFin] = useState('');
   const [typeCalendar, setTypeCalendar] = useState('day');
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const clients = useSelector((state) => state?.appointment?.clients);
   //const [clients, setClients] = useState([]);
 
   const addEmployee = () => {
@@ -47,7 +48,7 @@ const CalendarManager = () => {
       const newEmployee = {
         id: Date.now().toString(),
         title: name,
-        avatar: name.split(' ').map(n => n[0]).join('').toUpperCase()
+        avatar: name.split(' ').map(n => n[0]).join('').toUpperCase(),
       };
       setEmployees([...employees, newEmployee]);
     }
@@ -187,6 +188,11 @@ const CalendarManager = () => {
     //fetchEventsForDay(visibleDay);
   };
 
+  const handleSlotLaneMount = (arg) => {
+    if (arg.isPast) {
+      arg.el.classList.add('past-time-slot');
+    }
+  };
 
   const handleSaveSchedule = () => {
     if (selectHoraInicio && selectHoraFin) {
@@ -196,6 +202,11 @@ const CalendarManager = () => {
       });
       setShowEditSchedule(false);
     }
+  }
+
+  const getClientInfo = (clienteId) => {
+    const resp = clients?.find(i => Number(i?.id) === Number(clienteId));
+    if (resp) return resp
   }
 
   const fetchEmployees = async (isoDay) => {
@@ -210,7 +221,8 @@ const CalendarManager = () => {
         const obj = {
           id: i.id_usuario,
           title: i.nombre,
-          avatar: getInitials(i.nombre)
+          avatar: getInitials(i.nombre),
+          foto: i.foto
         }
         newArray.push(obj);
       })
@@ -255,7 +267,8 @@ const CalendarManager = () => {
           id: i?.id_cliente,
           name: i?.nombre?.toLowerCase(),
           email: i?.email,
-          avatar: getInitials(i.nombre)
+          avatar: getInitials(i.nombre),
+          phone: i?.telefono
         }
 
         newArray.push(obj)
@@ -444,6 +457,8 @@ const CalendarManager = () => {
           // Handlers
           eventDrop={handleEventDrop}
           eventResize={handleEventResize}
+          nowIndicator={true}
+          slotLaneDidMount={handleSlotLaneMount}
 
           // (Opcional) Reglas para permitir/denegar drop/resize
           eventAllow={(dropInfo, draggedEvent) => {
@@ -470,25 +485,108 @@ const CalendarManager = () => {
           }}
 
 
-          // Render de recursos/eventos que ya tienes
-          resourceLabelContent={(arg) => (
-            <div className="flex flex-col items-center py-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                <span className="text-blue-600 font-semibold text-sm">
-                  {arg.resource.extendedProps.avatar}
+          resourceLabelContent={(arg) => {
+            return (
+              <div className="flex flex-col items-center py-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                  {arg.resource.extendedProps.foto ?
+                    <img className='rounded-full w-12 h-12' src={`/${arg.resource.extendedProps.foto}`} />
+                    :
+                    <span className="text-blue-600 font-semibold text-sm">
+                      {arg.resource.extendedProps.avatar}
+                    </span>
+                  }
+                </div>
+                <span className="text-sm font-medium text-gray-900">
+                  {arg.resource.title}
                 </span>
               </div>
-              <span className="text-sm font-medium text-gray-900">
-                {arg.resource.title}
-              </span>
-            </div>
-          )}
+            )
+          }}
           eventContent={(arg) => {
-            return (
-              <div className="p-1 text-sm cursor-pointer">
-                <div className="font-medium"><strong>Hora: </strong>{arg.timeText}</div>
-                <div className="truncate"><strong>Servicio: </strong>{arg?.event?.title} - {arg?.event?.extendedProps?.descripcion}</div>
+            const { event, timeText } = arg || {};
+            //const xp = event?.extendedProps || {};
+            const client = getClientInfo(arg.event.extendedProps.id_cliente);
+            //console.log('#client', client, arg.event.extendedProps)
+            const phoneMX = client?.phone ? toMXPhone(client.phone) : null;
+            const xp = arg.event.extendedProps;
 
+            // Anticipo: asumo que viene como número en xp.anticipo o boolean xp.anticipo_pagado
+            const anticipoMonto = xp?.anticipo?.monto_neto;
+            const anticipoPagado = xp?.tiene_anticipo;
+
+            const waHref = phoneMX
+              ? buildWhatsAppUrl({
+                phone: phoneMX,
+                name: client?.name || client?.nombre || "",
+                dateText: xp?.fecha ? xp.fecha : '',
+                timeText,
+                service: event?.title || "",
+                descripcion: xp?.descripcion || ""
+              })
+              : null;
+
+            return (
+              <div className="group   shadow-sm transition-shadow p-2 text-[13px] leading-snug h-full" style={{borderLeft: '15px solid #67e8b8ff'}}>
+                {/* Header: hora + badges */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 font-semibold">
+                    <Clock className="w-4 h-4" />
+                    <span>{timeText}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {anticipoPagado && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[11px] font-medium">
+                        <CircleDollarSign className="w-3.5 h-3.5" />
+                        {anticipoMonto ? `Anticipo $${anticipoMonto.toLocaleString()}` : "Anticipo pagado"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Servicio */}
+                <div className="mt-1.5 flex items-start gap-1.5 ">
+                  <Scissors className="w-4 h-4 mt-[2px] shrink-0" />
+                  <div className="truncate">
+                    <span className="font-semibold">Servicio: </span>
+                    <span className="truncate">
+                      {event?.title}
+                      {xp?.descripcion ? ` - ${xp.descripcion}` : ""}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Cliente */}
+                <div className="mt-1 flex items-start gap-1.5 ">
+                  <UserIcon className="w-4 h-4 mt-[2px] shrink-0" />
+                  <div className="min-w-0">
+                    <span className="font-semibold">Cliente: </span>
+                    <span className="truncate">{client?.name || client?.nombre || "—"}</span>
+                  </div>
+                </div>
+
+                {/* Acciones */}
+                <div className="mt-2 flex items-center gap-2">
+                  {waHref ? (
+                    <a
+                      href={waHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[12px] font-medium text-emerald-700 hover:bg-emerald-100 active:scale-[0.98] transition"
+                      onClick={(e) => e.stopPropagation()}
+                      title="Abrir WhatsApp"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-[12px] cursor-not-allowed">
+                      <MessageCircle className="w-4 h-4" />
+                      Sin teléfono
+                    </span>
+                  )}
+                </div>
               </div>
             )
           }}
