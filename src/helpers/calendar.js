@@ -34,7 +34,7 @@ export const getInitials = (fullName = '') => {
 const paletteFor = (cita) => {
   return cita?.tiene_anticipo
     ? { bg: '#648ab5ff', border: '#1653a3ff', color: '#000' }
-    : { bg: '#165874', border: '#4c7d92', color: '#fff '};
+    : { bg: '#165874', border: '#4c7d92', color: '#fff ' };
 };
 
 export const mapCitaToEvent = (c) => {
@@ -121,3 +121,8 @@ export const buildWhatsAppUrl = ({ phone, name, dateText, timeText, service, des
   const text = `Hola ${name || ""}, te escribimos para tu cita del ${dateText} a las ${timeText} (${service}${descripcion ? " - " + descripcion : ""}).`;
   return `${base}${phone}?text=${encodeURIComponent(text)}`;
 };
+
+export const getClientInfo = (clienteId, clients) => {
+  const resp = clients?.find(i => Number(i?.id) === Number(clienteId));
+  if (resp) return resp
+}

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import  { useState, useEffect } from 'react';
-import { X, Clock, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Clock, Calendar, MessageCircle } from 'lucide-react';
 import dayjs from "dayjs";
 import { useSelector } from 'react-redux'
 import ClientSelection from './steps/ClientSelection';
@@ -8,7 +8,7 @@ import ServiceSelection from './steps/ServiceSelection';
 import ServicesList from './steps/ServicesList';
 import Cart from './steps/Cart';
 import WidgetSteps from './WidgetSteps';
-import { formatTime, formatDate } from '../../helpers/calendar';
+import { formatTime, formatDate, toMXPhone, buildWhatsAppUrl } from '../../helpers/calendar';
 
 import "dayjs/locale/es";
 dayjs.locale("es");
@@ -21,7 +21,9 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
   const [day, setDay] = useState('');
   const [advanceAmount, setAdvanceAmount] = useState(0);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [waHref, setWaHref] = useState(null);
   const clients = useSelector((state) => state?.appointment?.clients);
+
 
 
   if (!isOpen) return null;
@@ -77,9 +79,23 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
         serviceDescription: event?.descripcion
       }
       setSelectedServices([service]);
-      
+
       //advance
       setAdvanceAmount(event?.anticipo?.monto_neto ? Number(event?.anticipo?.monto_neto) : 0)
+
+
+      //whatsapp
+      const phoneMX = findClient?.phone ? toMXPhone(findClient.phone) : null;
+      setWaHref(phoneMX
+        ? buildWhatsAppUrl({
+          phone: phoneMX,
+          name: findClient?.name || findClient?.nombre || "",
+          dateText: event?.fecha ? event.fecha : '',
+          timeText: event?.hora,
+          service: event?.title || "",
+          descripcion: event?.descripcion || ""
+        })
+        : null)
     }
   }, [event, clients]);
 
@@ -95,10 +111,14 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
       {selectedClient && (
         <div
           className={`fixed top-[50px] right-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          style={{
+            overflowY: 'auto',
+            height: 'calc(100vh - 50px)'
+          }}
         >
           <div>
             {selectedClient &&
-              <div className="p-6 border-b border-gray-200">
+              <div className="pl-6 pt-6 pr-6 border-b border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-5 h-5 text-[#5fba9a]" />
@@ -129,6 +149,23 @@ const EditAppointmentModal = ({ isOpen, onClose, onSave, event }) => {
                   <div className="text-xs text-blue-600 mt-1">
                     {selectedSlot?.employeeName}
                   </div>
+
+                  {waHref &&
+                    <div className='mt-2'>
+                      <a
+                        href={waHref}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[12px] font-medium text-emerald-700 hover:bg-emerald-100 active:scale-[0.98] transition"
+                        onClick={(e) => e.stopPropagation()}
+                        title="Abrir WhatsApp"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        WhatsApp
+                      </a>
+                    </div>
+                  }
+
                 </div>
 
 

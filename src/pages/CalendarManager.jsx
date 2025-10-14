@@ -16,7 +16,7 @@ import EditAppointmentModal from '../components/calendar/EditAppointmentModal';
 import CalendarSelect from '../components/utils/CalendarSelect';
 import { getEmployees, getAppoinments, getSchedule, getBankTerminals, updateAppointment } from '../api/calendar';
 import { getClients } from '../api/clients';
-import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, getClientById, onlyDigits, toMXPhone, buildWhatsAppUrl } from '../helpers/calendar';
+import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, toMXPhone, buildWhatsAppUrl, getClientInfo } from '../helpers/calendar';
 import { setClientsList, setTerminals } from '../store/clientsSlice';
 
 import 'dayjs/locale/es';
@@ -202,11 +202,6 @@ const CalendarManager = () => {
       });
       setShowEditSchedule(false);
     }
-  }
-
-  const getClientInfo = (clienteId) => {
-    const resp = clients?.find(i => Number(i?.id) === Number(clienteId));
-    if (resp) return resp
   }
 
   const fetchEmployees = async (isoDay) => {
@@ -506,7 +501,7 @@ const CalendarManager = () => {
           eventContent={(arg) => {
             const { event, timeText } = arg || {};
             //const xp = event?.extendedProps || {};
-            const client = getClientInfo(arg.event.extendedProps.id_cliente);
+            const client = getClientInfo(arg.event.extendedProps.id_cliente, clients);
             //console.log('#client', client, arg.event.extendedProps)
             const phoneMX = client?.phone ? toMXPhone(client.phone) : null;
             const xp = arg.event.extendedProps;
@@ -527,7 +522,7 @@ const CalendarManager = () => {
               : null;
 
             return (
-              <div className="group   shadow-sm transition-shadow p-2 text-[13px] leading-snug h-full" style={{borderLeft: '15px solid #67e8b8ff'}}>
+              <div className="group   shadow-sm transition-shadow p-2 text-[13px] leading-snug h-full" style={{ borderLeft: '15px solid #67e8b8ff' }}>
                 {/* Header: hora + badges */}
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 font-semibold">
@@ -558,35 +553,39 @@ const CalendarManager = () => {
                 </div>
 
                 {/* Cliente */}
-                <div className="mt-1 flex items-start gap-1.5 ">
-                  <UserIcon className="w-4 h-4 mt-[2px] shrink-0" />
-                  <div className="min-w-0">
-                    <span className="font-semibold">Cliente: </span>
-                    <span className="truncate">{client?.name || client?.nombre || "—"}</span>
+                {xp?.tiempo > 50 &&
+                  <div className="mt-1 flex items-start gap-1.5 ">
+                    <UserIcon className="w-4 h-4 mt-[2px] shrink-0" />
+                    <div className="min-w-0">
+                      <span className="font-semibold">Cliente: </span>
+                      <span className="truncate">{client?.name || client?.nombre || "—"}</span>
+                    </div>
                   </div>
-                </div>
+                }
 
                 {/* Acciones */}
-                <div className="mt-2 flex items-center gap-2">
-                  {waHref ? (
-                    <a
-                      href={waHref}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[12px] font-medium text-emerald-700 hover:bg-emerald-100 active:scale-[0.98] transition"
-                      onClick={(e) => e.stopPropagation()}
-                      title="Abrir WhatsApp"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      WhatsApp
-                    </a>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-[12px] cursor-not-allowed">
-                      <MessageCircle className="w-4 h-4" />
-                      Sin teléfono
-                    </span>
-                  )}
-                </div>
+                {xp?.tiempo > 50 &&
+                  <div className="mt-2 flex items-center gap-2">
+                    {waHref ? (
+                      <a
+                        href={waHref}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[12px] font-medium text-emerald-700 hover:bg-emerald-100 active:scale-[0.98] transition"
+                        onClick={(e) => e.stopPropagation()}
+                        title="Abrir WhatsApp"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        WhatsApp
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-[12px] cursor-not-allowed">
+                        <MessageCircle className="w-4 h-4" />
+                        Sin teléfono
+                      </span>
+                    )}
+                  </div>
+                }
               </div>
             )
           }}
