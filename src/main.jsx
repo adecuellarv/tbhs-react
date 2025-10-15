@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import "./index.css";
+import 'driver.js/dist/driver.css';
 import App from "./App.jsx";
 // Opcional si usas rutas y no tienes rewrites en Apache/Nginx:
 // import { HashRouter } from "react-router-dom";

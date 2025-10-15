@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import resourceDayGridPlugin from "@fullcalendar/resource-daygrid";
 import esLocale from "@fullcalendar/core/locales/es";
 import { useDispatch, useSelector } from 'react-redux'
-import { Plus, ChevronLeft, ChevronRight, Settings, PenIcon, Clock, User as UserIcon, MessageCircle, CircleDollarSign, Scissors } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Settings, PenIcon, Clock, User as UserIcon, MessageCircle, CircleDollarSign, Scissors, HelpCircleIcon } from 'lucide-react';
 import dayjs from 'dayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -18,6 +18,8 @@ import { getEmployees, getAppoinments, getSchedule, getBankTerminals, updateAppo
 import { getClients } from '../api/clients';
 import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, toMXPhone, buildWhatsAppUrl, getClientInfo } from '../helpers/calendar';
 import { setClientsList, setTerminals } from '../store/clientsSlice';
+import { useDriverTour } from '../hooks/useDriverTour';
+import { TOUR } from '../constans/tour';
 
 import 'dayjs/locale/es';
 
@@ -40,6 +42,12 @@ const CalendarManager = () => {
   const [typeCalendar, setTypeCalendar] = useState('day');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const clients = useSelector((state) => state?.appointment?.clients);
+  const steps = useMemo(() => (TOUR), []);
+
+  const { start } = useDriverTour(steps, {
+    runOnMount: true,
+    storageKey: 'tour_home_v1_seen',
+  });
   //const [clients, setClients] = useState([]);
 
   const addEmployee = () => {
@@ -327,7 +335,7 @@ const CalendarManager = () => {
             </button>
 
             {/* El DatePicker ocupa ancho completo en móvil */}
-            <div className="min-w-[180px] sm:min-w-[220px] w-full sm:w-auto">
+            <div className="min-w-[180px] sm:min-w-[220px] w-full sm:w-auto" data-tour="date">
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                 <DatePicker
                   label="Selecciona una fecha"
@@ -338,6 +346,7 @@ const CalendarManager = () => {
                   }}
                   // Fuerza UI móvil bajo 640px
                   desktopModeMediaQuery="@media (min-width: 640px)"
+
                 />
               </LocalizationProvider>
             </div>
@@ -357,6 +366,7 @@ const CalendarManager = () => {
               <div
                 className="flex items-center gap-2 cursor-pointer text-sm sm:text-base"
                 onClick={() => setShowEditSchedule(true)}
+                data-tour="schedule"
               >
                 <strong>Horario</strong> {schedule.hora_inicio} - {schedule.hora_fin}
                 <PenIcon className="w-4 h-4 text-gray-500" />
@@ -393,6 +403,14 @@ const CalendarManager = () => {
                 </button>
               </div>
             )}
+            <div>
+              <button
+                onClick={start}
+                className="flex gap-2 rounded-md px-3 py-1 text-sm bg-blue-200 text-black ml-20 cursor-pointer"
+              >
+                <HelpCircleIcon size={18} /> Ayuda / Tour
+              </button>
+            </div>
           </div>
 
           {/* derecha */}
@@ -416,7 +434,7 @@ const CalendarManager = () => {
       </div>
 
       {/* Calendar */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6" data-tour="calendar">
         <FullCalendar
           schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
           ref={calendarRef}
@@ -482,7 +500,7 @@ const CalendarManager = () => {
 
           resourceLabelContent={(arg) => {
             return (
-              <div className="flex flex-col items-center py-4">
+              <div className="flex flex-col items-center py-4" data-tour="employee">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
                   {arg.resource.extendedProps.foto ?
                     <img className='rounded-full w-12 h-12' src={`/${arg.resource.extendedProps.foto}`} />

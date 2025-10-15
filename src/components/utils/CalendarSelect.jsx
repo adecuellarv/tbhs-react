@@ -17,6 +17,7 @@ export default function CalendarSelect({ typeCalendar, setTypeCalendar }) {
       <div
         className="border border-gray-300 rounded px-3 py-1 text-sm flex items-center justify-between cursor-pointer bg-white"
         onClick={() => setOpen(!open)}
+        data-tour="type-calendar"
       >
         <div className="flex items-center gap-2">
           {selectedOption.icon}
