@@ -5,18 +5,17 @@ import interactionPlugin from '@fullcalendar/interaction';
 import resourceDayGridPlugin from "@fullcalendar/resource-daygrid";
 import esLocale from "@fullcalendar/core/locales/es";
 import { useDispatch, useSelector } from 'react-redux'
-import { Plus, ChevronLeft, ChevronRight, Settings, PenIcon, Clock, User as UserIcon, MessageCircle, CircleDollarSign, Scissors, HelpCircleIcon } from 'lucide-react';
 import dayjs from 'dayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { toast } from 'sonner';
 import AppointmentModal from '../components/calendar/AddAppointmentModal';
 import EditAppointmentModal from '../components/calendar/EditAppointmentModal';
-import CalendarSelect from '../components/utils/CalendarSelect';
+import CalendarEmployeHeader from '../components/calendar/CalendarEmployeHeader';
+import CalendarDetailEvent from '../components/calendar/CalendarDetailEvent';
+import CalendarHeader from '../components/calendar/CalendarHeader';
 import { getEmployees, getAppoinments, getSchedule, getBankTerminals, updateAppointment } from '../api/calendar';
 import { getClients } from '../api/clients';
-import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, toMXPhone, buildWhatsAppUrl, getClientInfo } from '../helpers/calendar';
+import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, handleSlotLaneMount } from '../helpers/calendar';
 import { setClientsList, setTerminals } from '../store/clientsSlice';
 import { useDriverTour } from '../hooks/useDriverTour';
 import { TOUR } from '../constans/tour';
@@ -196,12 +195,6 @@ const CalendarManager = () => {
     //fetchEventsForDay(visibleDay);
   };
 
-  const handleSlotLaneMount = (arg) => {
-    if (arg.isPast) {
-      arg.el.classList.add('past-time-slot');
-    }
-  };
-
   const handleSaveSchedule = () => {
     if (selectHoraInicio && selectHoraFin) {
       setSchedule({
@@ -321,117 +314,27 @@ const CalendarManager = () => {
   return (
     <div className="h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
-          {/* izquierda */}
-          <div className="flex flex-wrap items-center gap-2">
-            <CalendarSelect
-              typeCalendar={typeCalendar}
-              setTypeCalendar={setTypeCalendar}
-            />
-
-            <button onClick={goToPrevious} className="p-1 hover:bg-gray-100 rounded">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-
-            {/* El DatePicker ocupa ancho completo en móvil */}
-            <div className="min-w-[180px] sm:min-w-[220px] w-full sm:w-auto" data-tour="date">
-              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-                <DatePicker
-                  label="Selecciona una fecha"
-                  value={date}
-                  onChange={handlePickerChange}
-                  slotProps={{
-                    textField: { fullWidth: true, size: 'small' }
-                  }}
-                  // Fuerza UI móvil bajo 640px
-                  desktopModeMediaQuery="@media (min-width: 640px)"
-
-                />
-              </LocalizationProvider>
-            </div>
-
-            <button onClick={goToNext} className="p-1 hover:bg-gray-100 rounded">
-              <ChevronRight className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={goToToday}
-              className="px-2 py-1 text-sm border rounded hover:bg-gray-50"
-            >
-              Hoy
-            </button>
-
-            {!showEditSchedule ? (
-              <div
-                className="flex items-center gap-2 cursor-pointer text-sm sm:text-base"
-                onClick={() => setShowEditSchedule(true)}
-                data-tour="schedule"
-              >
-                <strong>Horario</strong> {schedule.hora_inicio} - {schedule.hora_fin}
-                <PenIcon className="w-4 h-4 text-gray-500" />
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <select
-                  className="border border-gray-300 rounded px-3 py-1 text-sm"
-                  value={selectHoraInicio}
-                  onChange={(e) => setSelectHoraInicio(e.target.value)}
-                >
-                  {horas.map((hora) => (
-                    <option key={hora} value={hora}>
-                      {hora}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className="border border-gray-300 rounded px-3 py-1 text-sm"
-                  value={selectHoraFin}
-                  onChange={(e) => setSelectHoraFin(e.target.value)}
-                >
-                  {horas.map((hora) => (
-                    <option key={hora} value={hora}>
-                      {hora}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  className="bg-blue-500 text-white px-3 sm:px-4 py-1 rounded-md text-sm"
-                  onClick={handleSaveSchedule}
-                >
-                  Guardar
-                </button>
-              </div>
-            )}
-            <div>
-              <button
-                onClick={start}
-                className="flex gap-2 rounded-md px-3 py-1 text-sm bg-blue-200 text-black ml-20 cursor-pointer"
-              >
-                <HelpCircleIcon size={18} /> Ayuda / Tour
-              </button>
-            </div>
-          </div>
-
-          {/* derecha */}
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            {false && (
-              <button className="p-2 hover:bg-gray-100 rounded">
-                <Settings className="w-4 h-4" />
-              </button>
-            )}
-            {false && (
-              <button
-                onClick={addEmployee}
-                className="bg-black text-white px-4 py-2 rounded text-sm hover:bg-gray-800 flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Añadir</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <CalendarHeader
+        typeCalendar={typeCalendar}
+        setTypeCalendar={setTypeCalendar}
+        goToPrevious={goToPrevious}
+        AdapterDayjs={AdapterDayjs}
+        date={date}
+        handlePickerChange={handlePickerChange}
+        goToNext={goToNext}
+        goToToday={goToToday}
+        showEditSchedule={showEditSchedule}
+        setShowEditSchedule={setShowEditSchedule}
+        schedule={schedule}
+        selectHoraInicio={selectHoraInicio}
+        setSelectHoraInicio={setSelectHoraInicio}
+        horas={horas}
+        selectHoraFin={selectHoraFin}
+        setSelectHoraFin={setSelectHoraFin}
+        handleSaveSchedule={handleSaveSchedule}
+        start={start}
+        addEmployee={addEmployee}
+      />
 
       {/* Calendar */}
       <div className="flex-1 p-6" data-tour="calendar">
@@ -444,8 +347,6 @@ const CalendarManager = () => {
           headerToolbar={false}
           resources={employees}
           events={events}
-
-          // Selección que ya tienes
           selectable={true}
           selectMirror={true}
           select={handleDateSelect}
@@ -500,111 +401,17 @@ const CalendarManager = () => {
 
           resourceLabelContent={(arg) => {
             return (
-              <div className="flex flex-col items-center py-4" data-tour="employee">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                  {arg.resource.extendedProps.foto ?
-                    <img className='rounded-full w-12 h-12' src={`/${arg.resource.extendedProps.foto}`} />
-                    :
-                    <span className="text-blue-600 font-semibold text-sm">
-                      {arg.resource.extendedProps.avatar}
-                    </span>
-                  }
-                </div>
-                <span className="text-sm font-medium text-gray-900">
-                  {arg.resource.title}
-                </span>
-              </div>
+              <CalendarEmployeHeader arg={arg} />
             )
           }}
           eventContent={(arg) => {
-            const { event, timeText } = arg || {};
-            //const xp = event?.extendedProps || {};
-            const client = getClientInfo(arg.event.extendedProps.id_cliente, clients);
-            //console.log('#client', client, arg.event.extendedProps)
-            const phoneMX = client?.phone ? toMXPhone(client.phone) : null;
-            const xp = arg.event.extendedProps;
 
-            // Anticipo: asumo que viene como número en xp.anticipo o boolean xp.anticipo_pagado
-            const anticipoMonto = xp?.anticipo?.monto_neto;
-            const anticipoPagado = xp?.tiene_anticipo;
-
-            const waHref = phoneMX
-              ? buildWhatsAppUrl({
-                phone: phoneMX,
-                name: client?.name || client?.nombre || "",
-                dateText: xp?.fecha ? xp.fecha : '',
-                timeText,
-                service: event?.title || "",
-                descripcion: xp?.descripcion || ""
-              })
-              : null;
 
             return (
-              <div className="group   shadow-sm transition-shadow p-2 text-[13px] leading-snug h-full" style={{ borderLeft: '15px solid #67e8b8ff' }}>
-                {/* Header: hora + badges */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 font-semibold">
-                    <Clock className="w-4 h-4" />
-                    <span>{timeText}</span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    {anticipoPagado && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[11px] font-medium">
-                        <CircleDollarSign className="w-3.5 h-3.5" />
-                        {anticipoMonto ? `Anticipo $${anticipoMonto.toLocaleString()}` : "Anticipo pagado"}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Servicio */}
-                <div className="mt-1.5 flex items-start gap-1.5 ">
-                  <Scissors className="w-4 h-4 mt-[2px] shrink-0" />
-                  <div className="truncate">
-                    <span className="font-semibold">Servicio: </span>
-                    <span className="truncate">
-                      {event?.title}
-                      {xp?.descripcion ? ` - ${xp.descripcion}` : ""}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Cliente */}
-                {xp?.tiempo > 50 &&
-                  <div className="mt-1 flex items-start gap-1.5 ">
-                    <UserIcon className="w-4 h-4 mt-[2px] shrink-0" />
-                    <div className="min-w-0">
-                      <span className="font-semibold">Cliente: </span>
-                      <span className="truncate">{client?.name || client?.nombre || "—"}</span>
-                    </div>
-                  </div>
-                }
-
-                {/* Acciones */}
-                {xp?.tiempo > 50 &&
-                  <div className="mt-2 flex items-center gap-2">
-                    {waHref ? (
-                      <a
-                        href={waHref}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[12px] font-medium text-emerald-700 hover:bg-emerald-100 active:scale-[0.98] transition"
-                        onClick={(e) => e.stopPropagation()}
-                        title="Abrir WhatsApp"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                        WhatsApp
-                      </a>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-[12px] cursor-not-allowed">
-                        <MessageCircle className="w-4 h-4" />
-                        Sin teléfono
-                      </span>
-                    )}
-                  </div>
-                }
-              </div>
+              <CalendarDetailEvent
+                arg={arg}
+                clients={clients}
+              />
             )
           }}
           eventClick={handleEventClick}

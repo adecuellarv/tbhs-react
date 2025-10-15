@@ -126,3 +126,9 @@ export const getClientInfo = (clienteId, clients) => {
   const resp = clients?.find(i => Number(i?.id) === Number(clienteId));
   if (resp) return resp
 }
+
+export const handleSlotLaneMount = (arg) => {
+    if (arg.isPast) {
+      arg.el.classList.add('past-time-slot');
+    }
+  };
