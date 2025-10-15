@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { toast } from 'sonner';
 import AppointmentModal from '../components/calendar/AddAppointmentModal';
-import EditAppointmentModal from '../components/calendar/EditAppointmentModal';
+import EditView from '../components/calendar/edit/EditView';
 import CalendarEmployeHeader from '../components/calendar/CalendarEmployeHeader';
 import CalendarDetailEvent from '../components/calendar/CalendarDetailEvent';
 import CalendarHeader from '../components/calendar/CalendarHeader';
@@ -205,6 +205,10 @@ const CalendarManager = () => {
     }
   }
 
+  const handleSave = () => {
+
+  }
+
   const fetchEmployees = async (isoDay) => {
     const values = {
       fecha: isoDay
@@ -230,6 +234,7 @@ const CalendarManager = () => {
     try {
       const resp = await getAppoinments({ fecha: isoDay });
       const citas = resp?.citas ?? [];
+      console.log('#citas', citas)
       const events = citas.map(mapCitaToEvent);
       setEvents(events);
       setIsModalOpen(false);
@@ -237,6 +242,7 @@ const CalendarManager = () => {
       setEvents([]);
     }
   };
+  console.log('#events', events)
 
   const fetchSchedule = async (isoDay) => {
     const resp = await getSchedule();
@@ -434,14 +440,15 @@ const CalendarManager = () => {
       )}
 
       {isEditModalOpen && (
-        <EditAppointmentModal
+        <EditView
           isOpen={isEditModalOpen}
           onClose={() => {
             setIsEditModalOpen(false);
             setSelectedEvent(null);
           }}
-          onSave={handleAppointmentSave}
+          onSave={handleSave}
           event={selectedEvent}
+          employees={employees}
         />
       )}
     </div>
