@@ -207,6 +207,7 @@ const EditView = ({ isOpen, onClose, onSave, event, employees }) => {
                   services={selectedServices}
                   edit={false}
                   handleSave={handleDelete}
+                  event={event}
                 />
               </div>
 

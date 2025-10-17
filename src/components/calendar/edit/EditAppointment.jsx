@@ -67,7 +67,7 @@ export default function EditAppointment({
 
   const [date, setDate] = useState(initialDate);
   const [time, setTime] = useState(initialStart);
-  const [tiempoMin, setTiempoMin] = useState('');
+  const [tiempoMin, setTiempoMin] = useState(event?.tiempo);
   const [employeeId, setEmployeeId] = useState(initialEmployee);
 
 

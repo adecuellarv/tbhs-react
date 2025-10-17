@@ -13,7 +13,8 @@ const WidgetSteps = ({
   setAdvanceAmount,
   services,
   edit = true,
-  handleSave }) => {
+  handleSave,
+  event }) => {
   const total = services.reduce((sum, service) => sum + Number(service.costo), 0);
   const [open, setOpen] = useState(false);
   const [openDeleteAnticipo, setOpenDeleteAnticipo] = useState(false);
@@ -43,9 +44,11 @@ const WidgetSteps = ({
 
   const handleRemoveAnticipo = async () => {
     const values = {
-      id: selectedServices[0]?.anticipo?.id_anticipo
+      id: selectedServices[0]?.anticipo?.id_anticipo,
+      id_agendas_grupo: event?.id_agendas_grupo,
+      id_agenda_actual: event?.id_agenda
     };
-
+    
     const resp = await deleteAdvance(values)
     if (resp) {
       toast.success('Anticipo eliminado');
