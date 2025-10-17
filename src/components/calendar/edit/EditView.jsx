@@ -27,8 +27,6 @@ const EditView = ({ isOpen, onClose, onSave, event, employees }) => {
   const [showEdit, setShowEdit] = useState(false);
   const clients = useSelector((state) => state?.appointment?.clients);
 
-
-
   if (!isOpen) return null;
 
   const handleClientSelect = (client) => {
@@ -111,6 +109,8 @@ const EditView = ({ isOpen, onClose, onSave, event, employees }) => {
           onSave={onSave}
           event={event}
           employees={employees}
+          clients={clients}
+          handleSave={handleSave}
         />
         :
         <>

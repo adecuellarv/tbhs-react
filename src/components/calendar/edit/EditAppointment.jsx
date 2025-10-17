@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useMemo, useState } from "react";
-import { X, Clock, Calendar as CalendarIcon, UserCog, UserRound, Plus, Trash2 } from "lucide-react";
+import { X, Clock, Calendar as CalendarIcon, UserCog, UserRound } from "lucide-react";
+import { Select, message, TreeSelect } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import localizedFormat from "dayjs/plugin/localizedFormat";
@@ -11,9 +12,12 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 
-// Reutilizamos tus componentes existentes:
 import ClientSelection from "../steps/ClientSelection";
 import AddClient from "../AddClient";
+import { getClientInfo } from "../../../helpers/calendar";
+import { editAppointmentFull } from "../../../api/calendar";
+import { getServices } from "../../../api/services";
+
 
 dayjs.locale("es");
 dayjs.extend(localizedFormat);
@@ -30,11 +34,20 @@ const Label = ({ icon: Icon, children }) => (
 export default function EditAppointment({
   isOpen,
   onClose,
-  onSave,
   event,
-  employees = [],
+  employees,
+  clients,
+  handleSave
 }) {
   const [submitting, setSubmitting] = useState(false);
+  const [serviceCategories, setServiceCategories] = useState([]);
+  const [currentService, setCurrentService] = useState();
+
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [clientPanelOpen, setClientPanelOpen] = useState(false);
+  const [addClientModal, setAddClientModal] = useState(false);
+
+  if (!isOpen || !event) return null;
 
   // -------- Iniciales de calendario --------
   const initialDate = useMemo(() => {
@@ -51,74 +64,54 @@ export default function EditAppointment({
     [event]
   );
 
+  const [date, setDate] = useState(initialDate);
+  const [time, setTime] = useState(initialStart);
+  const [employeeId, setEmployeeId] = useState(initialEmployee);
+
   const tiempoMin = useMemo(() => {
     const t = Number(event?.extendedProps?.tiempo || 60);
     return Number.isFinite(t) ? t : 60;
   }, [event]);
 
-  const [date, setDate] = useState(initialDate);
-  const [time, setTime] = useState(initialStart);
-  const [employeeId, setEmployeeId] = useState(initialEmployee);
 
-  // -------- Cliente --------
-  const initialClient = useMemo(() => {
-    if (!event?.extendedProps?.id_cliente) return null;
-    return { id: String(event.extendedProps.id_cliente) };
-  }, [event]);
+  const { extendedProps = {} } = event;
+  const servicio = extendedProps?.servicio || event?.title || "Servicio";
+  const idAgenda = extendedProps?.id_agenda || event?.id;
 
-  const [selectedClient, setSelectedClient] = useState(initialClient);
-  const [clientPanelOpen, setClientPanelOpen] = useState(false);
-  const [addClientModal, setAddClientModal] = useState(false);
+  const handleUpdate = async () => {
+    if (!startDateTime || !endDateTime || !employeeId || !selectedClient?.id) return;
+    setSubmitting(true);
 
-  // -------- Anticipos --------
-  // Normalizamos a lista. Cada item puede traer id_anticipo (existente en DB).
-  const initialAdvances = useMemo(() => {
-    const a = event?.extendedProps?.anticipo;
-    if (!a) return [];
-    if (Array.isArray(a)) return a.map(x => ({ ...x, __state: "unchanged" }));
-    return [{ ...a, __state: "unchanged" }]; // uno solo
-  }, [event]);
+    try {
+      const payload = {
+        id: idAgenda,
+        fecha: startDateTime.format("YYYY-MM-DD"),
+        hora: startDateTime.format("HH:mm:ss"),
+        tiempo: tiempoMin,
+        id_usuario: employeeId,
+        id_cliente: selectedClient.id,
+        id_servicio: currentService?.id_servicios_empresa ? currentService?.id_servicios_empresa : currentService,
+        observaciones: extendedProps?.descripcion,
+      };
 
-  const [advances, setAdvances] = useState(initialAdvances);
-  // helpers
-  const addAdvance = () => {
-    setAdvances(prev => [
-      ...prev,
-      {
-        id_anticipo: null, // nuevo
-        id_agenda: event?.extendedProps?.id_agenda || event?.id,
-        monto_neto: "",
-        tipo_pago: "1",
-        comision: "0",
-        status: "1",
-        notas: "",
-        fecha_anticipo: dayjs().format("YYYY-MM-DD"),
-        __state: "new",
-      },
-    ]);
-  };
-  const removeAdvance = (idx) => {
-    setAdvances(prev => {
-      const c = [...prev];
-      const item = c[idx];
-      // Si es nuevo, lo quitamos; si existe en BD, lo marcamos como deleted
-      if (item?.__state === "new") {
-        c.splice(idx, 1);
-      } else {
-        c[idx] = { ...item, __state: "deleted" };
+      const ok = await editAppointmentFull(payload);
+
+      if (ok) {
+        //onSave?.(payload);
+        //onClose?.();
+        message.success("Cita actualizada con exito");
+
+        setTimeout(() => {
+          onClose?.();
+        }, 600);
       }
-      return c;
-    });
-  };
-  const updateAdvanceField = (idx, field, value) => {
-    setAdvances(prev => {
-      const c = [...prev];
-      const item = c[idx];
-      const nextState =
-        item.__state === "new" ? "new" : item.__state === "deleted" ? "deleted" : "updated";
-      c[idx] = { ...item, [field]: value, __state: nextState };
-      return c;
-    });
+    } catch (e) {
+      console.error(e);
+      message.error("Ocurrió un error al actualizar la cita.");
+    } finally {
+      setSubmitting(false);
+      handleSave();
+    }
   };
 
   // -------- Derivados de fecha/hora --------
@@ -142,60 +135,49 @@ export default function EditAppointment({
     return s.charAt(0).toUpperCase() + s.slice(1);
   }, [date]);
 
+  const fetchServices = async () => {
+    const resp = await getServices();
+    if (resp?.length) {
+      const newArray = [];
+
+      resp.map(i => {
+        if (i?.services?.length) {
+          i?.services?.map(k => {
+            newArray.push(k);
+          })
+        }
+      })
+      setServiceCategories(newArray)
+    }
+  }
+
   // -------- Efectos: reset si cambia el evento --------
   useEffect(() => {
     setDate(initialDate);
     setTime(initialStart);
-    setEmployeeId(initialEmployee);
-    setSelectedClient(initialClient);
-    setAdvances(initialAdvances);
-  }, [initialDate, initialStart, initialEmployee, initialClient, initialAdvances]);
+    //setEmployeeId(initialEmployee);
+    //setSelectedClient(initialClient);
+    //setAdvances(initialAdvances);
+  }, [initialDate, initialStart]);
 
-  if (!isOpen || !event) return null;
-
-  const { extendedProps = {} } = event;
-  const servicio = extendedProps?.servicio || event?.title || "Servicio";
-  const idAgenda = extendedProps?.id_agenda || event?.id;
-
-  const handleSave = async () => {
-    if (!startDateTime || !endDateTime || !employeeId || !selectedClient?.id) return;
-    setSubmitting(true);
-    try {
-      // Partimos anticipos en 3 grupos para el backend:
-      const advances_new = advances.filter(a => a.__state === "new" && a.__state !== "deleted")
-        .map(({ __state, ...rest }) => rest);
-      const advances_update = advances.filter(a => a.__state === "updated")
-        .map(({ __state, ...rest }) => rest);
-      const advances_delete = advances
-        .filter(a => a.__state === "deleted" && a.id_anticipo)
-        .map(a => a.id_anticipo);
-
-      const payload = {
-        id_agenda: idAgenda,
-        date: startDateTime.format("YYYY-MM-DD"),
-        startHour: startDateTime.format("HH:mm:ss"),
-        endHour: endDateTime.format("HH:mm:ss"),
-        tiempo: tiempoMin,
-        id_usuario: employeeId,
-        id_cliente: selectedClient.id, // EDITADO
-        id_servicios_empresa: extendedProps?.id_servicios_empresa,
-        servicio,
-        descripcion: extendedProps?.descripcion,
-        // Anticipos (CRUD)
-        advances_new,
-        advances_update,
-        advances_delete,
-      };
-
-      onSave?.(payload);
-      onClose?.();
-    } catch (e) {
-      console.error(e);
-      alert("Ocurrió un error al actualizar la cita.");
-    } finally {
-      setSubmitting(false);
+  useEffect(() => {
+    if (event?.id_cliente && clients?.length) {
+      const clientInfo = getClientInfo(event?.id_cliente, clients)
+      if (clientInfo) setSelectedClient(clientInfo)
     }
-  };
+  }, [clients, event]);
+
+  useEffect(() => {
+    if (serviceCategories?.length) {
+      const resp = serviceCategories.find(i => i?.id_servicios_empresa === event?.id_servicios_empresa);
+
+      setCurrentService(resp);
+    }
+  }, [serviceCategories]);
+
+  useEffect(() => {
+    fetchServices();
+  }, [])
 
   return (
     <>
@@ -240,25 +222,25 @@ export default function EditAppointment({
               </Label>
               <div className="text-xs text-blue-700">{tiempoMin} min</div>
             </div>
-   
+
           </div>
         </div>
 
         {/* Contenido */}
-        <div className="p-6 space-y-6 h-[calc(100%-160px)] overflow-y-auto">
+        <div className="p-6 space-y-6 overflow-y-auto" style={{ height: 'calc(100vh - 299px)' }}>
           {/* Cliente */}
           <div className="space-y-2">
             <Label icon={UserRound}>Cliente</Label>
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-800">
+              <div className="text-sm text-gray-800 font-bold">
                 {selectedClient?.name
-                  ? `${selectedClient.name} (ID: ${selectedClient.id})`
+                  ? `${selectedClient.name}`
                   : selectedClient?.id
                     ? `ID: ${selectedClient.id}`
                     : "Sin cliente"}
               </div>
               <button
-                className="text-sm px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50"
+                className="text-sm px-3 py-1.5 rounded-md bg-gray-300  hover:bg-gray-200 cursor-pointer"
                 onClick={() => {
                   setClientPanelOpen(true);
                   setAddClientModal(false);
@@ -268,7 +250,32 @@ export default function EditAppointment({
               </button>
             </div>
           </div>
+          <div className="space-y-2">
+            <Label icon={UserCog}>Editar servicio</Label>
+            <Select
+              showSearch
+              placeholder="Selecciona un servicio"
+              optionFilterProp="children"
+              value={currentService}
+              onChange={(value) => setCurrentService(value)}
+              size="large"
+              style={{ width: '100%' }}
+            >
+              <Select.Option value="" disabled>
+                Selecciona un servicio
+              </Select.Option>
 
+              {serviceCategories.map(serv => (
+                <Select.Option
+                  key={serv.id_servicios_empresa}
+                  value={serv.id_servicios_empresa}
+                >
+                  {serv.descripcion} — {serv.subfamilia_nombre}
+                </Select.Option>
+              ))}
+            </Select>
+
+          </div>
           {/* Editar calendario */}
           <div className="space-y-2 flex gap-2">
             <div className="">
@@ -302,36 +309,36 @@ export default function EditAppointment({
           {/* Editar empleado */}
           <div className="space-y-2">
             <Label icon={UserCog}>Editar empleado</Label>
-            <select
-              className="w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <Select
               value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
+              onChange={(e) => setEmployeeId(e)}
+              size="large"
+              style={{ width: '100%' }}
             >
-              <option value="" disabled>Selecciona un empleado</option>
+              <Select.Option value="" disabled>Selecciona un empleado</Select.Option>
               {employees.map(emp => (
-                <option key={emp.id} value={String(emp.id)}>{emp.name}</option>
+                <Select.Option key={emp.id} value={emp.id}>{emp.title}</Select.Option>
               ))}
-            </select>
-            <p className="text-xs text-gray-500">Cambia el <b>recurso</b> (empleado) asignado.</p>
+            </Select>
           </div>
 
           {/* Anticipos */}
-      
+
         </div>
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 flex items-center justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-3 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-50"
+            className="px-3 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-50 cursor-pointer"
             disabled={submitting}
           >
             Cancelar
           </button>
           <button
-            onClick={handleSave}
+            onClick={handleUpdate}
             disabled={submitting || !startDateTime || !endDateTime || !employeeId || !selectedClient?.id}
-            className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+            className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
           >
             {submitting ? "Guardando..." : "Guardar cambios"}
           </button>
@@ -346,20 +353,15 @@ export default function EditAppointment({
             onClick={() => setClientPanelOpen(false)}
           />
           <div className="fixed top-[50px] right-0 h-full w-[560px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out">
-            <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <Label icon={UserRound}>Seleccionar cliente</Label>
               <div className="flex items-center gap-2">
+
                 <button
-                  className="px-3 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-50"
-                  onClick={() => setAddClientModal(v => !v)}
-                >
-                  {addClientModal ? "Buscar existentes" : "Nuevo cliente"}
-                </button>
-                <button
-                  className="p-2 hover:bg-gray-100 rounded-full"
+                  className="p-2 flex gap-1 hover:bg-gray-100 rounded-full cursor-pointer"
                   onClick={() => setClientPanelOpen(false)}
                 >
-                  <X className="w-5 h-5" />
+                  Cancelar <X className="w-5 h-6" />
                 </button>
               </div>
             </div>

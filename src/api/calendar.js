@@ -85,3 +85,14 @@ export const updateAppointment = async (data) => {
   }
 }
 
+export const editAppointmentFull = async (data) => {
+  try {
+    const resp = await api.post(`/apis/agenda/agenda/editar`, data, {
+      headers: { "Content-Type": "application/json" }
+    });
+    if (resp?.data) return resp?.data;
+  } catch (error) {
+    return;
+  }
+}
+

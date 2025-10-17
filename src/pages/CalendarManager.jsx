@@ -206,7 +206,8 @@ const CalendarManager = () => {
   }
 
   const handleSave = () => {
-
+    const isoDay = date.startOf('day').format('YYYY-MM-DD');
+    fetchEventsForDay(isoDay);
   }
 
   const fetchEmployees = async (isoDay) => {
@@ -242,7 +243,6 @@ const CalendarManager = () => {
       setEvents([]);
     }
   };
-  console.log('#events', events)
 
   const fetchSchedule = async (isoDay) => {
     const resp = await getSchedule();
@@ -449,6 +449,7 @@ const CalendarManager = () => {
           onSave={handleSave}
           event={selectedEvent}
           employees={employees}
+          clients={clients}
         />
       )}
     </div>
