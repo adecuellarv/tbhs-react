@@ -12,11 +12,12 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 
-import ClientSelection from "../steps/ClientSelection";
-import AddClient from "../AddClient";
+
 import { getClientInfo } from "../../../helpers/calendar";
 import { editAppointmentFull } from "../../../api/calendar";
 import { getServices } from "../../../api/services";
+import Header from "./Header";
+import SelectClient from "./SelectClient";
 
 
 dayjs.locale("es");
@@ -66,12 +67,8 @@ export default function EditAppointment({
 
   const [date, setDate] = useState(initialDate);
   const [time, setTime] = useState(initialStart);
+  const [tiempoMin, setTiempoMin] = useState('');
   const [employeeId, setEmployeeId] = useState(initialEmployee);
-
-  const tiempoMin = useMemo(() => {
-    const t = Number(event?.extendedProps?.tiempo || 60);
-    return Number.isFinite(t) ? t : 60;
-  }, [event]);
 
 
   const { extendedProps = {} } = event;
@@ -97,13 +94,7 @@ export default function EditAppointment({
       const ok = await editAppointmentFull(payload);
 
       if (ok) {
-        //onSave?.(payload);
-        //onClose?.();
-        message.success("Cita actualizada con exito");
-
-        setTimeout(() => {
-          onClose?.();
-        }, 600);
+        onClose?.();
       }
     } catch (e) {
       console.error(e);
@@ -129,11 +120,6 @@ export default function EditAppointment({
     return startDateTime.add(tiempoMin, "minute");
   }, [startDateTime, tiempoMin]);
 
-  const prettyDay = useMemo(() => {
-    if (!date) return "";
-    const s = dayjs(date).format("dddd D MMMM");
-    return s.charAt(0).toUpperCase() + s.slice(1);
-  }, [date]);
 
   const fetchServices = async () => {
     const resp = await getServices();
@@ -149,6 +135,12 @@ export default function EditAppointment({
       })
       setServiceCategories(newArray)
     }
+  }
+
+  const handleChangeSelect = (id) => {
+    const resp = serviceCategories.find(i => i?.id_servicios_empresa === id);
+    setCurrentService(resp);
+    setTiempoMin(resp?.tiempo_servicio)
   }
 
   // -------- Efectos: reset si cambia el evento --------
@@ -179,6 +171,10 @@ export default function EditAppointment({
     fetchServices();
   }, [])
 
+  const value = currentService
+    ? String(currentService.id_servicios_empresa)
+    : undefined;
+
   return (
     <>
       {/* Backdrop */}
@@ -193,38 +189,15 @@ export default function EditAppointment({
           }`}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-3">
-            <div className="space-y-1">
-              <div className="text-xs uppercase tracking-wide text-gray-500">Editar cita</div>
-              <div className="text-lg font-semibold text-gray-800">{servicio}</div>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full"
-              title="Cerrar"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Resumen */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <Label icon={CalendarIcon}>{prettyDay}</Label>
-              <div className="text-xs text-blue-700">#{idAgenda}</div>
-            </div>
-            <div className="mt-1 flex items-center justify-between">
-              <Label icon={Clock}>
-                {startDateTime && endDateTime
-                  ? `${startDateTime.format("HH:mm")} - ${endDateTime.format("HH:mm")}`
-                  : "--:--"}
-              </Label>
-              <div className="text-xs text-blue-700">{tiempoMin} min</div>
-            </div>
-
-          </div>
-        </div>
+        <Header
+          servicio={servicio}
+          onClose={onClose}
+          date={date}
+          event={event}
+          startDateTime={startDateTime}
+          endDateTime={endDateTime}
+          tiempoMin={tiempoMin}
+        />
 
         {/* Contenido */}
         <div className="p-6 space-y-6 overflow-y-auto" style={{ height: 'calc(100vh - 299px)' }}>
@@ -254,24 +227,16 @@ export default function EditAppointment({
             <Label icon={UserCog}>Editar servicio</Label>
             <Select
               showSearch
-              placeholder="Selecciona un servicio"
-              optionFilterProp="children"
-              value={currentService}
-              onChange={(value) => setCurrentService(value)}
+              allowClear
               size="large"
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
+              placeholder="Buscar servicio…"
+              value={value}
+              onChange={handleChangeSelect}
             >
-              <Select.Option value="" disabled>
-                Selecciona un servicio
-              </Select.Option>
-
-              {serviceCategories.map(serv => (
-                <Select.Option
-                  key={serv.id_servicios_empresa}
-                  value={serv.id_servicios_empresa}
-                >
-                  {serv.descripcion} — {serv.subfamilia_nombre}
-                </Select.Option>
+              <Select.Option value="" disabled>Selecciona un servicio</Select.Option>
+              {serviceCategories.map(emp => (
+                <Select.Option key={emp.id_servicios_empresa} value={emp.id_servicios_empresa}>{emp.descripcion}</Select.Option>
               ))}
             </Select>
 
@@ -322,8 +287,6 @@ export default function EditAppointment({
             </Select>
           </div>
 
-          {/* Anticipos */}
-
         </div>
 
         {/* Footer */}
@@ -347,50 +310,13 @@ export default function EditAppointment({
 
       {/* Panel de cliente (reutiliza tus componentes) */}
       {clientPanelOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-30 z-[60] opacity-[.6]"
-            onClick={() => setClientPanelOpen(false)}
-          />
-          <div className="fixed top-[50px] right-0 h-full w-[560px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <Label icon={UserRound}>Seleccionar cliente</Label>
-              <div className="flex items-center gap-2">
-
-                <button
-                  className="p-2 flex gap-1 hover:bg-gray-100 rounded-full cursor-pointer"
-                  onClick={() => setClientPanelOpen(false)}
-                >
-                  Cancelar <X className="w-5 h-6" />
-                </button>
-              </div>
-            </div>
-
-            <div className="h-[calc(100%-56px)] overflow-y-auto p-4">
-              {!addClientModal ? (
-                <ClientSelection
-                  onClientSelect={(client) => {
-                    setSelectedClient(client); // espera { id, name, ...}
-                    setClientPanelOpen(false);
-                  }}
-                  selectedClient={selectedClient}
-                  setAddClient={setAddClientModal}
-                />
-              ) : (
-                <div className="p-2">
-                  <AddClient
-                    back={() => setAddClientModal(false)}
-                    setSelectedClient={(client) => {
-                      setSelectedClient(client);
-                      setClientPanelOpen(false);
-                      setAddClientModal(false);
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </>
+        <SelectClient
+          setClientPanelOpen={setClientPanelOpen}
+          addClientModal={addClientModal}
+          setSelectedClient={setSelectedClient}
+          selectedClient={selectedClient}
+          setAddClientModal={setAddClientModal}
+        />
       )}
     </>
   );

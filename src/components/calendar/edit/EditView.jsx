@@ -45,6 +45,7 @@ const EditView = ({ isOpen, onClose, onSave, event, employees }) => {
 
   const handleSave = async () => {
     onSave();
+    onClose();
   };
 
   const handleDelete = async (value) => {
