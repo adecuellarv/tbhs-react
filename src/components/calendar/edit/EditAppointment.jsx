@@ -233,6 +233,7 @@ export default function EditAppointment({
               placeholder="Buscar servicio…"
               value={value}
               onChange={handleChangeSelect}
+              disabled={event?.tiene_anticipo}
             >
               <Select.Option value="" disabled>Selecciona un servicio</Select.Option>
               {serviceCategories.map(emp => (

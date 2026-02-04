@@ -50,6 +50,7 @@ const EditView = ({ isOpen, onClose, onSave, event, employees }) => {
 
   const handleDelete = async (value) => {
     onSave(value);
+    onClose();
   };
 
   useEffect(() => {

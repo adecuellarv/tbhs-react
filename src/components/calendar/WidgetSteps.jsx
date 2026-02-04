@@ -53,6 +53,7 @@ const WidgetSteps = ({
     if (resp) {
       toast.success('Anticipo eliminado');
       setOpenDeleteAnticipo(false)
+      setOpen(false)
       handleSave();
       setAdvanceAmount(0)
     }
