@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ShoppingBasket, User, Trash2, Wallet } from 'lucide-react';
+import { ShoppingBasket, User, Trash2, Wallet, PlusIcon } from 'lucide-react';
 import { Button, Modal, Space } from 'antd';
 import { toast } from "sonner"
+import AnticiposForm from './edit/AnticiposForm';
 import { deleteApointment, deleteAdvance } from '../../api/calendar';
 
 const WidgetSteps = ({
@@ -18,6 +19,7 @@ const WidgetSteps = ({
   const total = services.reduce((sum, service) => sum + Number(service.costo), 0);
   const [open, setOpen] = useState(false);
   const [openDeleteAnticipo, setOpenDeleteAnticipo] = useState(false);
+  const [openAddAnticipo, setOpenAddAnticipo] = useState(false);
 
   const handleRemoveService = (idOrIdx) => {
     setSelectedServices(prev =>
@@ -48,7 +50,7 @@ const WidgetSteps = ({
       id_agendas_grupo: event?.id_agendas_grupo,
       id_agenda_actual: event?.id_agenda
     };
-    
+
     const resp = await deleteAdvance(values)
     if (resp) {
       toast.success('Anticipo eliminado');
@@ -157,10 +159,26 @@ const WidgetSteps = ({
                       e.stopPropagation();
                       setOpenDeleteAnticipo(true);
                     }}
-                    className="rounded-full p-1 hover:bg-red-800 transition-opacity group-hover:opacity-100 bg-red-600 text-white ml-6"
+                    className="rounded-full p-1 hover:bg-red-800 transition-opacity group-hover:opacity-100 bg-red-600 text-white ml-6 cursor-pointer"
                     title="Eliminar"
                   >
                     <Trash2 className="w-4 h-4" />
+                  </button>
+                }
+                {!edit &&
+                  <button
+                    type="button"
+                    aria-label={`Agregar anticipos`}
+                    onClick={(e) => {
+                      //e.preventDefault();
+                      //e.stopPropagation();
+                      //setOpenDeleteAnticipo(true);
+                      setOpenAddAnticipo(true)
+                    }}
+                    className="rounded-full p-1 hover:bg-blue-800 transition-opacity group-hover:opacity-100 bg-blue-600 text-white ml-6 cursor-pointer"
+                    title="Eliminar"
+                  >
+                    <PlusIcon className="w-4 h-4" />
                   </button>
                 }
               </div>
@@ -210,6 +228,15 @@ const WidgetSteps = ({
         )}
       >
         <p className='text-gray-600 font-bold'>¿Esta seguro que desea eliminar el anticipo?</p>
+      </Modal>
+
+      <Modal
+        open={openAddAnticipo}
+        title="Agregar anticipo"
+        onCancel={() => setOpenAddAnticipo(false)}
+        footer={false}
+      >
+        <AnticiposForm />
       </Modal>
     </div>
   );
