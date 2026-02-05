@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import resourceDayGridPlugin from "@fullcalendar/resource-daygrid";
+import timeGridPlugin from '@fullcalendar/timegrid';
 import esLocale from "@fullcalendar/core/locales/es";
 import { useDispatch, useSelector } from 'react-redux'
 import dayjs from 'dayjs';
@@ -21,6 +22,21 @@ import { useDriverTour } from '../hooks/useDriverTour';
 import { TOUR } from '../constans/tour';
 
 import 'dayjs/locale/es';
+
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia(query);
+    const onChange = () => setMatches(media.matches);
+    onChange();
+    media.addEventListener?.('change', onChange);
+    return () => media.removeEventListener?.('change', onChange);
+  }, [query]);
+
+  return matches;
+}
 
 const CalendarManager = () => {
   const dispatch = useDispatch()
@@ -46,6 +62,38 @@ const CalendarManager = () => {
   const events = useSelector((state) => state?.appointment?.events);
   const steps = useMemo(() => (TOUR), []);
 
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isTablet = useMediaQuery('(max-width: 1024px)');
+  const [mobileEmployeeId, setMobileEmployeeId] = useState(null);
+
+  const responsiveView = useMemo(() => {
+    if (isMobile) return 'timeGridDay';
+    return VIEW_MAP[typeCalendar];
+  }, [isMobile, typeCalendar]);
+
+  const calendarHeight = useMemo(() => {
+    if (isMobile) return 'auto';
+    return 'calc(100vh - 120px)';
+  }, [isMobile]);
+
+  const resourceAreaWidth = useMemo(() => {
+    if (isMobile) return '0px';
+    if (isTablet) return '150px';
+    return '200px';
+  }, [isMobile, isTablet]);
+
+  const resourcesForCalendar = useMemo(() => {
+    if (!isMobile) return employees;
+    if (!mobileEmployeeId) return [];
+    return employees.filter(e => String(e.id) === String(mobileEmployeeId));
+  }, [isMobile, employees, mobileEmployeeId]);
+
+  useEffect(() => {
+    if (isMobile && employees?.length && !mobileEmployeeId) {
+      setMobileEmployeeId(String(employees[0].id));
+    }
+  }, [isMobile, employees, mobileEmployeeId]);
+
   const { start } = useDriverTour(steps, {
     runOnMount: true,
     storageKey: 'tour_home_v1_seen',
@@ -66,10 +114,10 @@ const CalendarManager = () => {
 
   const handleDateSelect = (selectInfo) => {
     setSelectedSlot({
-      resourceId: selectInfo.resource.id,
+      resourceId: selectInfo.resource?.id,
       start: selectInfo.start,
       end: selectInfo.end,
-      employeeName: selectInfo.resource.title
+      employeeName: selectInfo.resource?.title
     });
     setIsModalOpen(true);
   };
@@ -310,14 +358,13 @@ const CalendarManager = () => {
 
   useEffect(() => {
     const api = calendarRef.current?.getApi();
-    if (api) api.changeView(VIEW_MAP[typeCalendar]);
-  }, [typeCalendar]);
+    if (api) api.changeView(responsiveView);
+  }, [responsiveView]);
 
   useEffect(() => {
     fetchClients();
     fetchTerminals();
   }, []);
-
 
   return (
     <div className="h-screen bg-gray-50">
@@ -344,16 +391,32 @@ const CalendarManager = () => {
         addEmployee={addEmployee}
       />
 
+      {isMobile && (
+        <div className="px-3 pt-3">
+          <select
+            className="w-full rounded-lg border border-gray-200 bg-white p-3 text-sm"
+            value={mobileEmployeeId ?? ''}
+            onChange={(e) => setMobileEmployeeId(e.target.value)}
+          >
+            {employees?.map((e) => (
+              <option key={e.id} value={String(e.id)}>
+                {e.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* Calendar */}
-      <div className="flex-1 p-6" data-tour="calendar">
+      <div className="flex-1 p-2 sm:p-4 lg:p-6" data-tour="calendar">
         <FullCalendar
           schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
           ref={calendarRef}
           locale={esLocale}
-          plugins={[resourceTimeGridPlugin, resourceDayGridPlugin, interactionPlugin]}
-          initialView={VIEW_MAP[typeCalendar]}
+          plugins={[resourceTimeGridPlugin, resourceDayGridPlugin, interactionPlugin, timeGridPlugin]}
+          initialView={responsiveView}
           headerToolbar={false}
-          resources={employees}
+          resources={resourcesForCalendar}
           events={events}
           selectable={true}
           selectMirror={true}
@@ -363,9 +426,9 @@ const CalendarManager = () => {
           slotMinTime={schedule.hora_inicio}
           slotMaxTime={schedule.hora_fin}
           slotDuration="00:15:00"
-          height="calc(100vh - 120px)"
-          resourceAreaHeaderContent="Empleados"
-          resourceAreaWidth="200px"
+          height={calendarHeight}
+          resourceAreaHeaderContent={isMobile ? '' : 'Empleados'}
+          resourceAreaWidth={resourceAreaWidth}
           allDaySlot={false}
 
           // === HABILITAR DRAG/RESIZE ===
@@ -374,7 +437,7 @@ const CalendarManager = () => {
           eventDurationEditable={true}    // cambiar duración
           eventResourceEditable={true}    // mover entre empleados (resources)
           droppable={false}               // si NO arrastras desde fuera
-          longPressDelay={250}            // mejor UX en móvil
+          longPressDelay={isMobile ? 120 : 250}            // mejor UX en móvil
 
           // Handlers
           eventDrop={handleEventDrop}
@@ -385,7 +448,6 @@ const CalendarManager = () => {
           // (Opcional) Reglas para permitir/denegar drop/resize
           eventAllow={(dropInfo, draggedEvent) => {
             const s = dayjs(dropInfo.start);
-            // por si FullCalendar no manda end (raro con allDaySlot=false), asumimos 15 min
             const e = dropInfo.end ? dayjs(dropInfo.end) : s.add(15, 'minute');
 
             const [hInicio, mInicio] = schedule.hora_inicio.split(':').map(Number);
@@ -406,15 +468,12 @@ const CalendarManager = () => {
             return start.isAfter(now); // solo permite si la hora es después de ahora
           }}
 
-
           resourceLabelContent={(arg) => {
             return (
               <CalendarEmployeHeader arg={arg} />
             )
           }}
           eventContent={(arg) => {
-
-
             return (
               <CalendarDetailEvent
                 arg={arg}
