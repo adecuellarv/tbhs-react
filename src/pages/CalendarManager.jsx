@@ -210,13 +210,6 @@ const CalendarManager = () => {
     }
   }
 
-  const handleSave = () => {
-    const isoDay = date.startOf('day').format('YYYY-MM-DD');
-    fetchEventsForDay(isoDay);
-    setShowEditSchedule(false);
-    toast.success('Cita actualizada')
-  }
-
   const fetchEmployees = async (isoDay) => {
     const values = {
       fecha: isoDay
@@ -449,18 +442,7 @@ const CalendarManager = () => {
       )}
 
       {openModalEdit && (
-        <EditView
-        /*
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedEvent(null);
-          }}*/
-        //onSave={handleSave}
-        //event={selectedEvent}
-        //employees={employees}
-        //clients={clients}
-        />
+        <EditView />
       )}
     </div>
   );

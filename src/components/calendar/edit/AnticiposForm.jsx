@@ -31,7 +31,7 @@ const AnticiposForm = ({ refreshEvent }) => {
   }
 
   const handleSave = async () => {
-    const totalAbonado = + Number(event?.anticipo?.monto_neto) + Number(advanceAmount)
+    const totalAbonado = + event?.anticipo?.monto_neto ? Number(event?.anticipo?.monto_neto) : 0 + Number(advanceAmount)
     const rest = Number(event?.costo) - totalAbonado;
     if (rest >= 0) {
       const values = {

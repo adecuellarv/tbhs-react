@@ -24,7 +24,7 @@ const CalendarDetailEvent = ({ arg, clients }) => {
     })
     : null;
   return (
-    <div className="group   shadow-sm transition-shadow p-2 text-[13px] leading-snug h-full" style={{ borderLeft: '15px solid #67e8b8ff' }}>
+    <div className={`group   shadow-sm transition-shadow ${xp?.descripcion ? 'p-2' : ''} text-[13px] leading-snug h-full`} style={{ borderLeft: '15px solid #67e8b8ff' }}>
       {/* Header: hora + badges */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 font-semibold">
@@ -43,16 +43,18 @@ const CalendarDetailEvent = ({ arg, clients }) => {
       </div>
 
       {/* Servicio */}
-      <div className="mt-1.5 flex items-start gap-1.5 ">
-        <Scissors className="w-4 h-4 mt-[2px] shrink-0" />
-        <div className="truncate">
-          <span className="font-semibold">Servicio: </span>
-          <span className="truncate">
-            {event?.title}
-            {xp?.descripcion ? ` - ${xp.descripcion}` : ""}
-          </span>
+      {xp?.descripcion &&
+        <div className="mt-1.5 flex items-start gap-1.5 ">
+          <Scissors className="w-4 h-4 mt-[2px] shrink-0" />
+          <div className="truncate">
+            <span className="font-semibold">Servicio: </span>
+            <span className="truncate">
+              {event?.title}
+              {xp?.descripcion ? ` - ${xp.descripcion}` : ""}
+            </span>
+          </div>
         </div>
-      </div>
+      }
 
       {/* Cliente */}
       {xp?.tiempo > 50 &&

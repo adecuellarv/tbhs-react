@@ -32,10 +32,6 @@ const EditView = () => {
 
   if (!isOpen) return null;
 
-  const handleDelete = async (value) => {
-    //onSave(value);
-    //onClose();
-  };
 
   useEffect(() => {
     if (event) {
@@ -187,7 +183,6 @@ const EditView = () => {
                   advanceAmount={advanceAmount}
                   setAdvanceAmount={setAdvanceAmount}
                   services={selectedServices}
-                  handleSave={handleDelete}
                   event={event}
                 />
               </div>

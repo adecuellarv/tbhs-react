@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
-import { color } from 'framer-motion';
 
 export const getInitials = (fullName = '') => {
   const name = String(fullName || '').trim();

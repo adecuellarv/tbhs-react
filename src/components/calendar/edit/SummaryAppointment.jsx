@@ -14,7 +14,6 @@ const SummaryAppointment = ({
   advanceAmount,
   setAdvanceAmount,
   services,
-  handleSave,
   event }) => {
   const dispatch = useDispatch()
   const total = services.reduce((sum, service) => sum + Number(service.costo), 0);
@@ -62,7 +61,6 @@ const SummaryAppointment = ({
     if (resp) {
       toast.success('Cita eliminada');
       setOpen(false)
-      handleSave(true);
     }
   };
 
@@ -72,13 +70,12 @@ const SummaryAppointment = ({
       id_agendas_grupo: event?.id_agendas_grupo,
       id_agenda_actual: event?.id_agenda
     };
-    
+
     const resp = await deleteAdvance(values)
     if (resp) {
       toast.success('Anticipo eliminado');
       setOpenDeleteAnticipo(false)
       setOpen(false)
-      handleSave();
       setAdvanceAmount(0)
       refreshCalendarData();
     }
