@@ -72,7 +72,7 @@ const SummaryAppointment = ({
       id_agendas_grupo: event?.id_agendas_grupo,
       id_agenda_actual: event?.id_agenda
     };
-    debugger
+    
     const resp = await deleteAdvance(values)
     if (resp) {
       toast.success('Anticipo eliminado');
