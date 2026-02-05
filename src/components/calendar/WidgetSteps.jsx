@@ -122,6 +122,7 @@ const WidgetSteps = ({
                               e.preventDefault();
                               e.stopPropagation();
                               handleRemoveService(id);
+                              setAdvanceAmount(0)
                             }}
                             className="rounded-full p-1 hover:bg-red-50 hover:text-red-600 transition-opacity opacity-70 group-hover:opacity-100"
                             title="Eliminar"

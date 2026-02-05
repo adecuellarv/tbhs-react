@@ -134,6 +134,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
                   setCurrentStep={setCurrentStep}
                   setSelectedServices={setSelectedServices}
                   advanceAmount={advanceAmount}
+                  setAdvanceAmount={setAdvanceAmount}
                   services={selectedServices}
                 />
               </div>
