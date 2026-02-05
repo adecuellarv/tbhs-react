@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux'
 import { ShoppingBasket, User, Trash2, Wallet, PlusIcon } from 'lucide-react';
 import { Button, Modal, Space } from 'antd';
 import { toast } from "sonner"
 import AnticiposForm from './AnticiposForm';
-import { deleteApointment, deleteAdvance } from '../../../api/calendar';
+import { deleteApointment, deleteAdvance, getAppoinments } from '../../../api/calendar';
+import { setEvents, setEvent } from "../../../store/clientsSlice";
+import { mapCitaToEvent, mergeDefined } from '../../../helpers/calendar';
 
 const SummaryAppointment = ({
   selectedClient,
@@ -13,10 +16,42 @@ const SummaryAppointment = ({
   services,
   handleSave,
   event }) => {
+  const dispatch = useDispatch()
   const total = services.reduce((sum, service) => sum + Number(service.costo), 0);
   const [open, setOpen] = useState(false);
   const [openDeleteAnticipo, setOpenDeleteAnticipo] = useState(false);
   const [openAddAnticipo, setOpenAddAnticipo] = useState(false);
+  const [selectedAnticipo, setSelectedAnticipo] = useState(null);
+  const dateCalendar = useSelector((state) => state?.appointment?.dateCalendar);
+  const events = useSelector((state) => state?.appointment?.events);
+
+  const refreshCalendarData = async () => {
+    try {
+      const resp = await getAppoinments({ fecha: dateCalendar });
+      const citas = resp?.citas ?? [];
+      const events = citas.map(mapCitaToEvent);
+      dispatch(setEvents(events));
+    } catch (e) {
+      console.log(e)
+      dispatch(setEvents([]));
+    }
+  }
+
+  const refreshEvent = (eventsUpdate) => {
+    if (!event?.id_agenda) return;
+
+    const currentId = String(event.id_agenda);
+
+    const fresh = eventsUpdate.find((c) => String(c?.extendedProps?.id_agenda) === currentId);
+
+    if (!fresh) {
+      return;
+    }
+
+    const nextEvent = mergeDefined(event, fresh?.extendedProps);
+
+    dispatch(setEvent(nextEvent));
+  }
 
   const handleDelete = async () => {
     const values = {
@@ -33,11 +68,11 @@ const SummaryAppointment = ({
 
   const handleRemoveAnticipo = async () => {
     const values = {
-      id: selectedServices[0]?.anticipo?.id_anticipo,
+      id: selectedAnticipo?.id_anticipo,
       id_agendas_grupo: event?.id_agendas_grupo,
       id_agenda_actual: event?.id_agenda
     };
-
+    debugger
     const resp = await deleteAdvance(values)
     if (resp) {
       toast.success('Anticipo eliminado');
@@ -45,12 +80,19 @@ const SummaryAppointment = ({
       setOpen(false)
       handleSave();
       setAdvanceAmount(0)
+      refreshCalendarData();
     }
   }
 
   const handleCancel = () => {
     setOpen(false);
   };
+
+  useEffect(() => {
+    if (events?.length) {
+      refreshEvent(events);
+    }
+  }, [events]);
 
   return (
     <div className="p-4">
@@ -116,44 +158,92 @@ const SummaryAppointment = ({
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <span className="text-[#165874] font-semibold"><Wallet /></span>
             </div>
-            <div className="text-left ">
-              <div className="text-sm text-gray-500">Total: <strong>${total}</strong></div>
+            <div className="text-left">
+              {/* Total */}
               <div className="text-sm text-gray-500">
-                Anticipo: <strong>${advanceAmount}</strong>
-                {!!advanceAmount &&
-                  <button
-                    type="button"
-                    aria-label={`Eliminar anticipos`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setOpenDeleteAnticipo(true);
-                    }}
-                    className="rounded-full p-1 hover:bg-red-800 transition-opacity group-hover:opacity-100 bg-red-600 text-white ml-6 cursor-pointer"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                }
+                Total: <strong>${total}</strong>
+              </div>
+
+              {/* Header Anticipos + botón agregar */}
+              <div className="mt-2 flex items-center justify-between">
+                <div className="text-sm text-gray-500">
+                  Anticipos:{" "}
+                  <strong>${advanceAmount}</strong>
+                  {event?.anticipo?.pagos_total ? (
+                    <span className="ml-2 text-xs text-gray-400">
+                      ({event.anticipo.pagos_total})
+                    </span>
+                  ) : null}
+                </div>
 
                 <button
                   type="button"
-                  aria-label={`Agregar anticipos`}
+                  aria-label="Agregar anticipo"
                   onClick={(e) => {
-                    //e.preventDefault();
-                    //e.stopPropagation();
-                    //setOpenDeleteAnticipo(true);
-                    setOpenAddAnticipo(true)
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setOpenAddAnticipo(true);
                   }}
-                  className="rounded-full p-1 hover:bg-blue-800 transition-opacity group-hover:opacity-100 bg-blue-600 text-white ml-6 cursor-pointer"
-                  title="Eliminar"
+                  className="rounded-full p-1 hover:bg-blue-800 bg-blue-600 text-white cursor-pointer"
+                  title="Agregar"
                 >
                   <PlusIcon className="w-4 h-4" />
                 </button>
-
               </div>
+
+              {/* Lista de anticipos (scroll) */}
+              {!!event?.anticipo?.pagos?.length ? (
+                <div className="mt-2 max-h-48 overflow-y-auto rounded-lg border border-gray-100 bg-white">
+                  <ul className="divide-y divide-gray-100">
+                    {event.anticipo.pagos.map((p) => (
+                      <li
+                        key={p.id_anticipo}
+                        className="flex items-center justify-between px-3 py-2"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-sm text-gray-700">
+                            <strong>${Number(p.monto_neto || 0).toFixed(2)}</strong>
+                            <span className="ml-2 text-xs text-gray-400">
+                              Folio {p.folio}
+                            </span>
+                          </div>
+
+                          <div className="text-xs text-gray-400 truncate">
+                            {p.tipo_pago_descripcion
+                              ? p.tipo_pago_descripcion
+                              : `Tipo pago: ${p.tipo_pago}`}
+                            {p.fecha_anticipo ? ` · ${p.fecha_anticipo}` : ""}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          aria-label={`Eliminar anticipo ${p.id_anticipo}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            // aquí abre tu modal y guarda el id seleccionado
+                            setSelectedAnticipo(p); // o setSelectedAnticipoId(p.id_anticipo)
+                            setOpenDeleteAnticipo(true);
+                          }}
+                          className="ml-3 rounded-full p-1 hover:bg-red-800 bg-red-600 text-white cursor-pointer"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="mt-2 text-xs text-gray-400">
+                  No hay anticipos registrados.
+                </div>
+              )}
+
               <div className="font-medium capitalize"></div>
             </div>
+
           </button>
         }
 
@@ -206,7 +296,12 @@ const SummaryAppointment = ({
         onCancel={() => setOpenAddAnticipo(false)}
         footer={false}
       >
-        <AnticiposForm />
+        <AnticiposForm
+          refreshEvent={() => {
+            //refreshEvent()
+            setOpenAddAnticipo(false);
+          }}
+        />
       </Modal>
     </div>
   );

@@ -1,4 +1,3 @@
-import axios from "axios";
 import { api } from "./common"
 
 export const getEmployees = async (data) => {
@@ -7,7 +6,7 @@ export const getEmployees = async (data) => {
       headers: { "Content-Type": "application/json" }
     });
     if (resp?.data) return resp?.data;
-  } catch (error) {
+  } catch  {
     return;
   }
 }
@@ -18,7 +17,7 @@ export const getAppoinments = async (data) => {
       headers: { "Content-Type": "application/json" }
     });
     if (resp?.data) return resp?.data;
-  } catch (error) {
+  } catch  {
     return;
   }
 }
@@ -27,7 +26,7 @@ export const getSchedule = async () => {
   try {
     const resp = await api.get(`/apis/agenda/agenda/getSchedule`, { withCredentials: true });
     if (resp?.data) return resp?.data;
-  } catch (error) {
+  } catch  {
     return;
   }
 }
@@ -38,7 +37,7 @@ export const setAppoiment = async (data) => {
       headers: { "Content-Type": "application/json" }
     });
     if (resp?.data) return resp?.data;
-  } catch (error) {
+  } catch  {
     return;
   }
 }
@@ -49,7 +48,7 @@ export const deleteApointment = async (data) => {
       headers: { "Content-Type": "application/json" }
     });
     if (resp?.data) return resp?.data;
-  } catch (error) {
+  } catch  {
     return;
   }
 }
@@ -60,7 +59,7 @@ export const deleteAdvance = async (data) => {
       headers: { "Content-Type": "application/json" }
     });
     if (resp?.data) return resp?.data;
-  } catch (error) {
+  } catch  {
     return;
   }
 }
@@ -69,7 +68,7 @@ export const getBankTerminals = async () => {
   try {
     const resp = await api.get(`/apis/agenda/agenda/getBankTerminals`);
     if (resp?.data) return resp?.data;
-  } catch (error) {
+  } catch {
     return;
   }
 }
@@ -80,7 +79,7 @@ export const updateAppointment = async (data) => {
       headers: { "Content-Type": "application/json" }
     });
     if (resp?.data) return resp?.data;
-  } catch (error) {
+  } catch {
     return;
   }
 }
@@ -91,7 +90,19 @@ export const editAppointmentFull = async (data) => {
       headers: { "Content-Type": "application/json" }
     });
     if (resp?.data) return resp?.data;
-  } catch (error) {
+  } catch {
+    return;
+  }
+}
+
+export const addAdvancePayment = async (data) => {
+  try {
+    const resp = await api.post(`/apis/agenda/agenda/addAdvancePayment`, data, {
+      headers: { "Content-Type": "application/json" }
+    });
+    if (resp?.data) return resp?.data;
+  } catch {
+
     return;
   }
 }

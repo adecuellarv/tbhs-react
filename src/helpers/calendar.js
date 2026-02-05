@@ -128,7 +128,20 @@ export const getClientInfo = (clienteId, clients) => {
 }
 
 export const handleSlotLaneMount = (arg) => {
-    if (arg.isPast) {
-      arg.el.classList.add('past-time-slot');
-    }
-  };
+  if (arg.isPast) {
+    arg.el.classList.add('past-time-slot');
+  }
+};
+
+export const mergeDefined = (target, source) => {
+  if (!source) return target;
+  const out = { ...target };
+
+  Object.keys(source).forEach((k) => {
+    const v = source[k];
+    // solo actualiza si el backend mandó la llave (incluye null si viene explícito)
+    if (v !== undefined) out[k] = v;
+  });
+
+  return out;
+};

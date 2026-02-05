@@ -1,19 +1,60 @@
 import { useState } from 'react';
 import { Checkbox } from 'antd';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Box } from 'lucide-react';
+import { toast } from "sonner"
 import PaymentTypeSelect from '../../utils/PaymentTypeSelect';
+import { addAdvancePayment, getAppoinments } from '../../../api/calendar';
+import { setEvents } from "../../../store/clientsSlice";
+import { mapCitaToEvent } from '../../../helpers/calendar';
 
-const AnticiposForm = () => {
+const AnticiposForm = ({ refreshEvent }) => {
+  const dispatch = useDispatch()
   const banks = useSelector((state) => state?.appointment?.bankTerminals);
-  const [hasAdvance, setHasAdvance] = useState(false);
-  const [advanceAmount, setAdvanceAmount] = useState(0);
+  const event = useSelector((state) => state?.appointment?.event);
+  const dateCalendar = useSelector((state) => state?.appointment?.dateCalendar);
+  const [advanceAmount, setAdvanceAmount] = useState('');
   const [payment, setPayment] = useState(1);
   const [comision, setComision] = useState(0);
-  const [dataType, setDataType] = useState('');
+  //const [dataType, setDataType] = useState('');
 
-  const handleSave = () => {
-    alert('hey')
+  const refreshCalendarData = async () => {
+    try {
+      const resp = await getAppoinments({ fecha: dateCalendar });
+      const citas = resp?.citas ?? [];
+      const events = citas.map(mapCitaToEvent);
+      dispatch(setEvents(events));
+    } catch (e) {
+      console.log(e)
+      dispatch(setEvents([]));
+    }
+  }
+
+  const handleSave = async () => {
+    const totalAbonado = + Number(event?.anticipo?.monto_neto) + Number(advanceAmount)
+    const rest = Number(event?.costo) - totalAbonado;
+    if (rest >= 0) {
+      const values = {
+        id_agenda: event?.id_agenda,
+        monto_neto: advanceAmount,
+        comision,
+        tipo_pago: payment,
+      }
+
+      const resp = await addAdvancePayment(values);
+      if (resp?.success) {
+        toast.success('Anticipo realizado')
+        setAdvanceAmount('')
+        setPayment(1)
+        setComision(0)
+        await refreshCalendarData();
+        refreshEvent();
+      }
+
+    } else {
+      toast.error('El monto supera el costo del servicio')
+    }
+
   }
 
   return (
@@ -28,6 +69,7 @@ const AnticiposForm = () => {
                 className="border-b border-gray-300 rounded-md p-2 placeholder-[#eee] outline-none text-2xl font-semibold"
                 type="number"
                 placeholder="100"
+                value={advanceAmount}
                 onChange={(e) => setAdvanceAmount(e?.target?.value)}
               />
             </div>
@@ -38,7 +80,7 @@ const AnticiposForm = () => {
                 onChange={(payload) => {
                   setPayment(payload.value);
                   setComision(payload.comision)
-                  setDataType(payload.dataType)
+                  //setDataType(payload.dataType)
                 }}
               />
             </div>
