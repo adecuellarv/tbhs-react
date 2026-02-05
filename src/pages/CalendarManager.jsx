@@ -16,7 +16,7 @@ import CalendarHeader from '../components/calendar/CalendarHeader';
 import { getEmployees, getAppoinments, getSchedule, getBankTerminals, updateAppointment } from '../api/calendar';
 import { getClients } from '../api/clients';
 import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, handleSlotLaneMount } from '../helpers/calendar';
-import { setClientsList, setTerminals } from '../store/clientsSlice';
+import { setClientsList, setTerminals, setEmployees, setEvent, setDateCalendar, setOpenModalEdit, setEvents } from '../store/clientsSlice';
 import { useDriverTour } from '../hooks/useDriverTour';
 import { TOUR } from '../constans/tour';
 
@@ -25,8 +25,8 @@ import 'dayjs/locale/es';
 const CalendarManager = () => {
   const dispatch = useDispatch()
   const calendarRef = useRef(null);
-  const [employees, setEmployees] = useState([]);
-  const [events, setEvents] = useState([]);
+  //const [employees, setEmployees] = useState([]);
+  //const [events, setEvents] = useState([]);
   const [schedule, setSchedule] = useState({
     hora_inicio: '08:00:00',
     hora_fin: '20:00:00'
@@ -41,6 +41,9 @@ const CalendarManager = () => {
   const [typeCalendar, setTypeCalendar] = useState('day');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const clients = useSelector((state) => state?.appointment?.clients);
+  const employees = useSelector((state) => state?.appointment?.employees);
+  const openModalEdit = useSelector((state) => state?.appointment?.openModalEdit);
+  const events = useSelector((state) => state?.appointment?.events);
   const steps = useMemo(() => (TOUR), []);
 
   const { start } = useDriverTour(steps, {
@@ -57,7 +60,7 @@ const CalendarManager = () => {
         title: name,
         avatar: name.split(' ').map(n => n[0]).join('').toUpperCase(),
       };
-      setEmployees([...employees, newEmployee]);
+      //dispatch(setEmployees([...employees, newEmployee]));
     }
   };
 
@@ -75,9 +78,10 @@ const CalendarManager = () => {
     const isoDay = date.startOf('day').format('YYYY-MM-DD');
     fetchEventsForDay(isoDay);
 
-    if (value) {
+    /*if (value) {
       setIsEditModalOpen(false);
-    }
+      dispatch(setOpenModalEdit(false))
+    }*/
   };
 
   const goto = (targetDayjs) => {
@@ -131,6 +135,7 @@ const CalendarManager = () => {
     };
 
     setSelectedEvent(eventData);
+    dispatch(setEvent(eventData))
 
     // Si quieres reutilizar tu modal para “ver/editar” la cita, puedes setear selectedSlot
     setSelectedSlot({
@@ -142,7 +147,7 @@ const CalendarManager = () => {
       ...eventData,
     });
 
-    setIsEditModalOpen(true);
+    dispatch(setOpenModalEdit(true))
   };
 
   const handleEventDrop = async (info) => {
@@ -229,7 +234,8 @@ const CalendarManager = () => {
         }
         newArray.push(obj);
       })
-      setEmployees(newArray)
+
+      dispatch(setEmployees(newArray))
     }
   }
 
@@ -237,11 +243,12 @@ const CalendarManager = () => {
     try {
       const resp = await getAppoinments({ fecha: isoDay });
       const citas = resp?.citas ?? [];
-      const events = citas.map(mapCitaToEvent);
-      setEvents(events);
+      const eventsList = citas.map(mapCitaToEvent);
+      dispatch(setEvents(eventsList));
       setIsModalOpen(false);
-    } catch (err) {
-      setEvents([]);
+    } catch (e) {
+      console.log(e)
+      dispatch(setEvents([]));
     }
   };
 
@@ -294,6 +301,7 @@ const CalendarManager = () => {
       fetchEmployees(isoDay);
       fetchEventsForDay(isoDay);
       fetchSchedule(isoDay);
+      dispatch(setDateCalendar(isoDay))
     }
   }, [date]);
 
@@ -440,17 +448,18 @@ const CalendarManager = () => {
         />
       )}
 
-      {isEditModalOpen && (
+      {openModalEdit && (
         <EditView
+        /*
           isOpen={isEditModalOpen}
           onClose={() => {
             setIsEditModalOpen(false);
             setSelectedEvent(null);
-          }}
-          onSave={handleSave}
-          event={selectedEvent}
-          employees={employees}
-          clients={clients}
+          }}*/
+        //onSave={handleSave}
+        //event={selectedEvent}
+        //employees={employees}
+        //clients={clients}
         />
       )}
     </div>

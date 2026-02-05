@@ -6,15 +6,14 @@ import dayjs from "dayjs";
 import "dayjs/locale/es";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import durationPlugin from "dayjs/plugin/duration";
-
+import { useSelector, useDispatch } from 'react-redux'
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-
-
-import { getClientInfo } from "../../../helpers/calendar";
-import { editAppointmentFull } from "../../../api/calendar";
+import { setEvents } from "../../../store/clientsSlice";
+import { getClientInfo, mapCitaToEvent } from "../../../helpers/calendar";
+import { editAppointmentFull, getAppoinments } from "../../../api/calendar";
 import { getServices } from "../../../api/services";
 import Header from "./Header";
 import SelectClient from "./SelectClient";
@@ -34,12 +33,9 @@ const Label = ({ icon: Icon, children }) => (
 
 export default function EditAppointment({
   isOpen,
-  onClose,
-  event,
-  employees,
-  clients,
-  handleSave
+  onClose
 }) {
+  const dispatch = useDispatch()
   const [submitting, setSubmitting] = useState(false);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [currentService, setCurrentService] = useState();
@@ -47,6 +43,10 @@ export default function EditAppointment({
   const [selectedClient, setSelectedClient] = useState(null);
   const [clientPanelOpen, setClientPanelOpen] = useState(false);
   const [addClientModal, setAddClientModal] = useState(false);
+  const clients = useSelector((state) => state?.appointment?.clients);
+  const event = useSelector((state) => state?.appointment?.event);
+  const employees = useSelector((state) => state?.appointment?.employees);
+  const dateCalendar = useSelector((state) => state?.appointment?.dateCalendar);
 
   if (!isOpen || !event) return null;
 
@@ -104,6 +104,18 @@ export default function EditAppointment({
       handleSave();
     }
   };
+
+  const handleSave = async () => {
+    try {
+      const resp = await getAppoinments({ fecha: dateCalendar });
+      const citas = resp?.citas ?? [];
+      const events = citas.map(mapCitaToEvent);
+      dispatch(setEvents(events));
+    } catch (e) {
+      console.log(e)
+      dispatch(setEvents([]));
+    }
+  }
 
   // -------- Derivados de fecha/hora --------
   const startDateTime = useMemo(() => {
