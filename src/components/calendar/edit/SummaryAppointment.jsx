@@ -5,7 +5,7 @@ import { Button, Modal, Space } from 'antd';
 import { toast } from "sonner"
 import AnticiposForm from './AnticiposForm';
 import { deleteApointment, deleteAdvance, getAppoinments } from '../../../api/calendar';
-import { setEvents, setEvent } from "../../../store/clientsSlice";
+import { setEvents, setEvent, setOpenModalEdit } from "../../../store/clientsSlice";
 import { mapCitaToEvent, mergeDefined } from '../../../helpers/calendar';
 
 const SummaryAppointment = ({
@@ -61,6 +61,8 @@ const SummaryAppointment = ({
     if (resp) {
       toast.success('Cita eliminada');
       setOpen(false)
+      dispatch(setOpenModalEdit(false))
+      refreshCalendarData();
     }
   };
 

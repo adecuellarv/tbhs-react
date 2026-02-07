@@ -9,7 +9,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8888/tbhs-actions',
+        target: 'https://thebesthairsalons.mx/', //'https://thebesthairsalons.mx/','http://localhost:8888/tbhs-actions/'
         changeOrigin: true,
         secure: false,
         rewrite: p => p.replace(/^\/api/, ''), // "/api/apis/..." -> "/apis/..."
