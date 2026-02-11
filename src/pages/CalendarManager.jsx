@@ -16,7 +16,7 @@ import CalendarDetailEvent from '../components/calendar/CalendarDetailEvent';
 import CalendarHeader from '../components/calendar/CalendarHeader';
 import { getEmployees, getAppoinments, getSchedule, getBankTerminals, updateAppointment } from '../api/calendar';
 import { getClients } from '../api/clients';
-import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, handleSlotLaneMount } from '../helpers/calendar';
+import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, handleSlotLaneMount, isBlockedByPermiso } from '../helpers/calendar';
 import { setClientsList, setTerminals, setEmployees, setEvent, setDateCalendar, setOpenModalEdit, setEvents } from '../store/clientsSlice';
 import { useDriverTour } from '../hooks/useDriverTour';
 import { TOUR } from '../constans/tour';
@@ -271,7 +271,8 @@ const CalendarManager = () => {
           id: i.id_usuario,
           title: i.nombre,
           avatar: getInitials(i.nombre),
-          foto: i.foto
+          foto: i.foto,
+          permisos: i.permisos ?? [],
         }
         newArray.push(obj);
       })
@@ -463,10 +464,19 @@ const CalendarManager = () => {
           }}
 
           selectAllow={(selectInfo) => {
-            const now = dayjs();
-            const start = dayjs(selectInfo.start);
-            return start.isAfter(now); // solo permite si la hora es después de ahora
+            const resourceId = selectInfo.resource?.id;
+            const start = selectInfo.start;
+            const end = selectInfo.end ?? dayjs(selectInfo.start).add(15, 'minute').toDate();
+
+            // (tu regla actual de "después de ahora")
+            if (!dayjs(start).isAfter(dayjs())) return false;
+
+            // bloqueo por permisos
+            if (isBlockedByPermiso(resourceId, start, end, employees)) return false;
+
+            return true;
           }}
+
 
           resourceLabelContent={(arg) => {
             return (

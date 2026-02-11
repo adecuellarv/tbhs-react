@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import AnticiposForm from './AnticiposForm';
 import { deleteApointment, deleteAdvance, getAppoinments } from '../../../api/calendar';
 import { setEvents, setEvent, setOpenModalEdit } from "../../../store/clientsSlice";
-import { mapCitaToEvent, mergeDefined } from '../../../helpers/calendar';
+import { mapCitaToEvent, mergeDefined, normalizeToISOZ } from '../../../helpers/calendar';
 
 const SummaryAppointment = ({
   selectedClient,
@@ -41,16 +41,24 @@ const SummaryAppointment = ({
 
     const currentId = String(event.id_agenda);
 
-    const fresh = eventsUpdate.find((c) => String(c?.extendedProps?.id_agenda) === currentId);
+    const fresh = eventsUpdate.find(
+      (c) => String(c?.extendedProps?.id_agenda) === currentId
+    );
 
-    if (!fresh) {
-      return;
-    }
+    if (!fresh) return;
 
-    const nextEvent = mergeDefined(event, fresh?.extendedProps);
+    const patch = {
+      ...fresh.extendedProps,
+      id: fresh.id,
+      title: fresh.title,
+      resourceId: fresh.resourceId,
+      start: normalizeToISOZ(fresh.start),
+      end: normalizeToISOZ(fresh.end),
+    };
 
+    const nextEvent = mergeDefined(event, patch);
     dispatch(setEvent(nextEvent));
-  }
+  };
 
   const handleDelete = async () => {
     const values = {

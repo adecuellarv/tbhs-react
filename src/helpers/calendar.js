@@ -144,3 +144,29 @@ export const mergeDefined = (target, source) => {
 
   return out;
 };
+
+export const normalizeToISOZ = (value) => {
+  if (!value) return value;
+ 
+  if (/[zZ]|[+-]\d{2}:\d{2}$/.test(value)) return value;
+
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? value : d.toISOString();
+};
+
+export const overlaps = (aStart, aEnd, bStart, bEnd) => {
+  const aS = dayjs(aStart);
+  const aE = dayjs(aEnd);
+  const bS = dayjs(bStart);
+  const bE = dayjs(bEnd);
+  return aS.isBefore(bE) && aE.isAfter(bS); // overlap real
+};
+
+export const isBlockedByPermiso = (resourceId, start, end, employees) => {
+  const emp = employees.find(e => String(e.id) === String(resourceId));
+  if (!emp?.permisos?.length) return false;
+
+  return emp.permisos.some(p =>
+    overlaps(start, end, p.start, p.end)
+  );
+};
