@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import Select from "react-select";
+import { Select } from '../utils/Select';
 import { CircleChevronLeft } from 'lucide-react';
 import { getInitials } from '../../helpers/calendar';
 import { createClient, getClients } from '../../api/clients';
@@ -35,11 +35,11 @@ const AddClient = ({ back, setSelectedClient }) => {
     const resp = await createClient(values);
     if (resp) {
       setClientCreated({
-          id: resp?.id_cliente,
-          name: name.trim(),
-          email: '',
-          avatar: getInitials(name.trim())
-        });
+        id: resp?.id_cliente,
+        name: name.trim(),
+        email: '',
+        avatar: getInitials(name.trim())
+      });
       fetchClients();
     }
     setLoading(false)
@@ -91,6 +91,9 @@ const AddClient = ({ back, setSelectedClient }) => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            style={{
+              border: '1px solid #eee'
+            }}
           />
         </div>
         <div className='mt-4'>
@@ -101,6 +104,9 @@ const AddClient = ({ back, setSelectedClient }) => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={app}
             onChange={(e) => setApp(e.target.value)}
+            style={{
+              border: '1px solid #eee'
+            }}
           />
         </div>
         <div className='mt-4'>
@@ -111,6 +117,9 @@ const AddClient = ({ back, setSelectedClient }) => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={apm}
             onChange={(e) => setApm(e.target.value)}
+            style={{
+              border: '1px solid #eee'
+            }}
           />
         </div>
         <div className='flex gap-2 mt-4 w-full'>
@@ -120,6 +129,9 @@ const AddClient = ({ back, setSelectedClient }) => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
               value={gener}
               onChange={(e) => setGener(e.target.value)}
+              style={{
+                border: '1px solid #eee'
+              }}
             >
               <option value="2">Mujer</option>
               <option value="1">Hombre</option>
@@ -143,24 +155,23 @@ const AddClient = ({ back, setSelectedClient }) => {
         <div className="mt-4">
           <label className="text-gray-800 font-semibold">Recomendado</label>
           <Select
-            placeholder="Selecciona recomendado..."
-            className="w-full text-gray-700"
-            isClearable
-            styles={{
-              control: (base) => ({
-                ...base,
-                borderColor: "#d1d5db",
-                borderRadius: "0.5rem",
-                padding: "2px 4px",
-                boxShadow: "none",
-                "&:hover": { borderColor: "#93c5fd" },
-              }),
-              indicatorsSeparator: () => null,
-            }}
-            options={clients?.map(i => ({ value: i.id, label: i.name }))}
+            showSearch
+            allowClear
+            size="large"
+            placeholder="Buscar recomendado..."
             value={recomended}
-            onChange={(opt) => setRecomended(opt)}  // opt puede ser null al limpiar
+            onChange={(opt) => setRecomended(opt)}
+
+            getPopupContainer={(triggerNode) => triggerNode.parentNode} // o document.body
+            options={[
+              { value: "", label: "Selecciona un servicio", disabled: true },
+              ...clients.map((s) => ({
+                value: s.id,
+                label: s.name,
+              })),
+            ]}
           />
+
         </div>
         <div>
           <div className="flex space-x-3 mt-6">
