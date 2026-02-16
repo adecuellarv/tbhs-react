@@ -65,22 +65,24 @@ export const mapCitaToEvent = (c) => {
 };
 
 export const getScheduleDay = (fechaStr, horarios) => {
+  if (!fechaStr) return null;
 
-  const fecha = new Date(fechaStr);
-  let diaSemana = fecha.getDay();
-  diaSemana = diaSemana === 0 ? 7 : diaSemana;
+  const [year, month, day] = fechaStr.split("-").map(Number);
+  const fecha = new Date(year, month - 1, day); // local time
 
-  const horario = horarios.find(h => parseInt(h.dia) === diaSemana);
+  let diaSemana = fecha.getDay(); // 0-6 (domingo=0)
+  diaSemana = diaSemana === 0 ? 7 : diaSemana; // lunes=1 ... domingo=7
 
-  if (!horario) {
-    return null;
-  }
+  const horario = horarios.find(h => Number(h.dia) === diaSemana);
+
+  if (!horario) return null;
 
   return {
     hora_inicio: horario.hora_e,
     hora_fin: horario.hora_s
   };
-}
+};
+
 
 export const horas = Array.from({ length: 24 }, (_, i) =>
   `${String(i).padStart(2, "0")}:00`
