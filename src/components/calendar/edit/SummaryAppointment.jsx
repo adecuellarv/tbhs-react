@@ -222,22 +222,23 @@ const SummaryAppointment = ({
                             {p.fecha_anticipo ? ` · ${p.fecha_anticipo}` : ""}
                           </div>
                         </div>
-
-                        <button
-                          type="button"
-                          aria-label={`Eliminar anticipo ${p.id_anticipo}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            // aquí abre tu modal y guarda el id seleccionado
-                            setSelectedAnticipo(p); // o setSelectedAnticipoId(p.id_anticipo)
-                            setOpenDeleteAnticipo(true);
-                          }}
-                          className="ml-3 rounded-full p-1 hover:bg-red-800 bg-red-600 text-white cursor-pointer"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {p?.id_venta === null && p?.tipo_pago !== "Mercado Pago" && p?.corte === "0"  &&
+                          <button
+                            type="button"
+                            aria-label={`Eliminar anticipo ${p.id_anticipo}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              // aquí abre tu modal y guarda el id seleccionado
+                              setSelectedAnticipo(p); // o setSelectedAnticipoId(p.id_anticipo)
+                              setOpenDeleteAnticipo(true);
+                            }}
+                            className="ml-3 rounded-full p-1 hover:bg-red-800 bg-red-600 text-white cursor-pointer"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        }
                       </li>
                     ))}
                   </ul>
