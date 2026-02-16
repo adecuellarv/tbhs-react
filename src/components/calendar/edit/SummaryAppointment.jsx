@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { ShoppingBasket, User, Trash2, Wallet, PlusIcon } from 'lucide-react';
 import { Button, Modal } from 'antd';
-import { toast } from "sonner"
+import { toast } from "react-hot-toast"
 import AnticiposForm from './AnticiposForm';
 import { deleteApointment, deleteAdvance, getAppoinments } from '../../../api/calendar';
 import { setEvents, setEvent, setOpenModalEdit } from "../../../store/clientsSlice";

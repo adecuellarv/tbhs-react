@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Box } from 'lucide-react';
-import { toast } from "sonner"
+import { toast } from "react-hot-toast"
 import PaymentTypeSelect from '../../utils/PaymentTypeSelect';
 import { addAdvancePayment, getAppoinments } from '../../../api/calendar';
 import { setEvents } from "../../../store/clientsSlice";

@@ -8,7 +8,7 @@ import esLocale from "@fullcalendar/core/locales/es";
 import { useDispatch, useSelector } from 'react-redux'
 import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 import AppointmentModal from '../components/calendar/AddAppointmentModal';
 import EditView from '../components/calendar/edit/EditView';
 import CalendarEmployeHeader from '../components/calendar/CalendarEmployeHeader';

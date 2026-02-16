@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Toaster } from "sonner";
+import { Toaster } from 'react-hot-toast';
 import CalendarManager from './pages/CalendarManager';
 import { useDriverTour } from "./hooks/useDriverTour";
 import { TOUR } from "./constans/tour";
@@ -13,9 +13,9 @@ const App = () => {
   });
   return (
     <div>
-      
+
       <CalendarManager />
-      <Toaster position="bottom-right" richColors />
+      <Toaster position="top-right"/>
     </div>
   );
 }

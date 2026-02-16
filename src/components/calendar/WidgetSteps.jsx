@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ShoppingBasket, User, Trash2, Wallet, PlusIcon } from 'lucide-react';
 import { Button, Modal } from 'antd';
-import { toast } from "sonner"
+import { toast } from "react-hot-toast"
 import AnticiposForm from './edit/AnticiposForm';
 import { deleteApointment, deleteAdvance } from '../../api/calendar';
 
