@@ -1,7 +1,7 @@
 import { Plus, ChevronLeft, ChevronRight, Settings, PenIcon, HelpCircleIcon } from 'lucide-react';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
 import CalendarSelect from '../utils/CalendarSelect';
+import { formatDate } from '../../helpers/calendar';
 
 const CalendarHeader = ({
   typeCalendar,
@@ -39,21 +39,10 @@ const CalendarHeader = ({
           </button>
 
           {/* El DatePicker ocupa ancho completo en móvil */}
-          <div className="min-w-[180px] sm:min-w-[220px] w-full sm:w-auto" data-tour="date">
-            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-              <DatePicker
-                label="Selecciona una fecha"
-                value={date}
-                onChange={handlePickerChange}
-                slotProps={{
-                  textField: { fullWidth: true, size: 'small' }
-                }}
-                // Fuerza UI móvil bajo 640px
-                desktopModeMediaQuery="@media (min-width: 640px)"
-
-              />
-            </LocalizationProvider>
+          <div className="min-w-[180px] sm:min-w-[220px] w-full sm:w-auto text-center" >
+            <h1>{date ? formatDate(date, "DD/MM/YYYY") : ''}</h1>
           </div>
+
 
           <button onClick={goToNext} className="p-1 hover:bg-gray-100 rounded">
             <ChevronRight className="w-5 h-5" />
@@ -107,14 +96,16 @@ const CalendarHeader = ({
               </button>
             </div>
           )}
-          <div>
-            <button
-              onClick={start}
-              className="flex gap-2 rounded-md px-3 py-1 text-sm bg-blue-200 text-black ml-20 cursor-pointer"
-            >
-              <HelpCircleIcon size={18} /> Ayuda / Tour
-            </button>
-          </div>
+          {false &&
+            <div>
+              <button
+                onClick={start}
+                className="flex gap-2 rounded-md px-3 py-1 text-sm bg-blue-200 text-black ml-20 cursor-pointer"
+              >
+                <HelpCircleIcon size={18} /> Ayuda / Tour
+              </button>
+            </div>
+          }
         </div>
 
         {/* derecha */}

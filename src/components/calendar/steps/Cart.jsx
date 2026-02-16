@@ -11,7 +11,7 @@ const Cart = ({ services, advanceAmount, setAdvanceAmount, payment, setPayment, 
   
 
   const onChange = (e) => {
-    setHasAdvance(e.target.checked);
+    setHasAdvance(e);
   };
 
   useEffect(() => {

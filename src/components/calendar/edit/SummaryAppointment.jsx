@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { ShoppingBasket, User, Trash2, Wallet, PlusIcon } from 'lucide-react';
-import { Button, Modal } from 'antd';
+//import { Button, Modal } from 'antd';
+import Modal from '../../utils/Modal';
 import { toast } from "react-hot-toast"
 import AnticiposForm from './AnticiposForm';
 import { deleteApointment, deleteAdvance, getAppoinments } from '../../../api/calendar';
@@ -222,7 +223,7 @@ const SummaryAppointment = ({
                             {p.fecha_anticipo ? ` · ${p.fecha_anticipo}` : ""}
                           </div>
                         </div>
-                        {p?.id_venta === null && p?.tipo_pago !== "Mercado Pago" && p?.corte === "0"  &&
+                        {p?.id_venta === null && p?.tipo_pago !== "Mercado Pago" && p?.corte === "0" &&
                           <button
                             type="button"
                             aria-label={`Eliminar anticipo ${p.id_anticipo}`}
@@ -273,16 +274,29 @@ const SummaryAppointment = ({
       <Modal
         open={open}
         title="Eliminar cita"
-        onCancel={handleCancel}
-        footer={(_, { OkBtn, CancelBtn }) => (
-          <>
-            <CancelBtn />
-            <Button className='bg-purple-300 text-purple-900' onClick={handleDelete}>Sí, eliminar</Button>
-          </>
-        )}
+        onClose={() => setOpen(false)}
+        footer={
+          <div className="flex w-full justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="rounded-md bg-purple-300 px-3 py-2 text-sm text-purple-900 hover:opacity-90"
+            >
+              Sí, eliminar
+            </button>
+          </div>
+        }
       >
-        <p className='text-gray-600 font-bold'>¿Esta seguro que desea eliminar esta cita?</p>
+        <p className="text-gray-600 font-bold">¿Esta seguro que desea eliminar esta cita?</p>
       </Modal>
+
 
       <Modal
         open={openDeleteAnticipo}
@@ -299,18 +313,45 @@ const SummaryAppointment = ({
       </Modal>
 
       <Modal
+        open={openDeleteAnticipo}
+        title="Eliminar anticipo"
+        onClose={() => setOpenDeleteAnticipo(false)}
+        footer={
+          <div className="flex w-full justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setOpenDeleteAnticipo(false)}
+              className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleRemoveAnticipo}
+              className="rounded-md bg-purple-300 px-3 py-2 text-sm text-purple-900 hover:opacity-90"
+            >
+              Sí, eliminar
+            </button>
+          </div>
+        }
+      >
+        <p className="text-gray-600 font-bold">¿Esta seguro que desea eliminar el anticipo?</p>
+      </Modal>
+
+      <Modal
         open={openAddAnticipo}
         title="Agregar anticipo"
-        onCancel={() => setOpenAddAnticipo(false)}
+        onClose={() => setOpenAddAnticipo(false)}
         footer={false}
+        bodyClassName="p-0" // si quieres que AnticiposForm maneje su padding
       >
         <AnticiposForm
           refreshEvent={() => {
-            //refreshEvent()
             setOpenAddAnticipo(false);
           }}
         />
       </Modal>
+
     </div>
   );
 };

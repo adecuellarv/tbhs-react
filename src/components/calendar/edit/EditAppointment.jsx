@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useMemo, useState } from "react";
 import { X, Clock, Calendar as CalendarIcon, UserCog, UserRound } from "lucide-react";
-import { message } from "antd";
+import { toast } from "react-hot-toast";
 import { Select } from "../../utils/Select";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
@@ -99,7 +99,7 @@ export default function EditAppointment({
       }
     } catch (e) {
       console.error(e);
-      message.error("Ocurrió un error al actualizar la cita.");
+      toast.error("Ocurrió un error al actualizar la cita.");
     } finally {
       setSubmitting(false);
       handleSave();

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Box } from 'lucide-react';
 import { toast } from "react-hot-toast"
 import PaymentTypeSelect from '../../utils/PaymentTypeSelect';
 import { addAdvancePayment, getAppoinments } from '../../../api/calendar';
@@ -59,7 +58,7 @@ const AnticiposForm = ({ refreshEvent }) => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100vh - 168px)" }}>
+    <div className="flex flex-col" style={{ height: "calc(100vh - 228px)" }}>
       {/* Contenido scrollable */}
       <div className="flex-1 overflow-y-auto p-4 bg-gray-100">
         <div className="mb-6">
