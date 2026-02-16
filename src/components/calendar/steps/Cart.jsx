@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Checkbox } from 'antd';
+import { Checkbox } from '../../utils/Checkbox';
 import { useSelector } from 'react-redux';
 import { Box } from 'lucide-react';
 import PaymentTypeSelect from '../../utils/PaymentTypeSelect';

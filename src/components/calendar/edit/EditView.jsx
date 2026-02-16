@@ -3,17 +3,13 @@ import { useState, useEffect } from 'react';
 import { X, Clock, Calendar, MessageCircle, Pencil } from 'lucide-react';
 import dayjs from "dayjs";
 import { useSelector, useDispatch } from 'react-redux'
-import ClientSelection from '../steps/ClientSelection';
-import ServiceSelection from '../steps/ServiceSelection';
-import ServicesList from '../steps/ServicesList';
-import Cart from '../steps/Cart';
+import { Button } from '../../utils/Button';
 import SummaryAppointment from './SummaryAppointment';
 import EditAppointment from './EditAppointment';
 import { setOpenModalEdit } from '../../../store/clientsSlice';
 import { formatTime, formatDate, toMXPhone, buildWhatsAppUrl } from '../../../helpers/calendar';
 
 import "dayjs/locale/es";
-import { Button } from 'antd';
 dayjs.locale("es");
 
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { ShoppingBasket, User, Trash2, Wallet, PlusIcon } from 'lucide-react';
-import { Button, Modal, Space } from 'antd';
+import { Button, Modal } from 'antd';
 import { toast } from "sonner"
 import AnticiposForm from './AnticiposForm';
 import { deleteApointment, deleteAdvance, getAppoinments } from '../../../api/calendar';

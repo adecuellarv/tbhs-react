@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useMemo, useState } from "react";
 import { X, Clock, Calendar as CalendarIcon, UserCog, UserRound } from "lucide-react";
-import { Select, message, TreeSelect } from "antd";
+import { message } from "antd";
+import { Select } from "../../utils/Select";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import localizedFormat from "dayjs/plugin/localizedFormat";
@@ -237,21 +238,26 @@ export default function EditAppointment({
           </div>
           <div className="space-y-2">
             <Label icon={UserCog}>Editar servicio</Label>
+
             <Select
               showSearch
               allowClear
               size="large"
-              style={{ width: "100%" }}
               placeholder="Buscar servicio…"
               value={value}
               onChange={handleChangeSelect}
               disabled={event?.tiene_anticipo}
-            >
-              <Select.Option value="" disabled>Selecciona un servicio</Select.Option>
-              {serviceCategories.map(emp => (
-                <Select.Option key={emp.id_servicios_empresa} value={emp.id_servicios_empresa}>{emp.descripcion}</Select.Option>
-              ))}
-            </Select>
+              getPopupContainer={(triggerNode) => triggerNode.parentNode} // o document.body
+              options={[
+                { value: "", label: "Selecciona un servicio", disabled: true },
+                ...serviceCategories.map((s) => ({
+                  value: s.id_servicios_empresa,
+                  label: s.descripcion,
+                })),
+              ]}
+            />
+
+
 
           </div>
           {/* Editar calendario */}
@@ -287,17 +293,24 @@ export default function EditAppointment({
           {/* Editar empleado */}
           <div className="space-y-2">
             <Label icon={UserCog}>Editar empleado</Label>
+   
+
             <Select
+              showSearch
+              allowClear
+              size="large"
+              placeholder="Buscar empleado"
               value={employeeId}
               onChange={(e) => setEmployeeId(e)}
-              size="large"
-              style={{ width: '100%' }}
-            >
-              <Select.Option value="" disabled>Selecciona un empleado</Select.Option>
-              {employees.map(emp => (
-                <Select.Option key={emp.id} value={emp.id}>{emp.title}</Select.Option>
-              ))}
-            </Select>
+              getPopupContainer={(triggerNode) => triggerNode.parentNode} // o document.body
+              options={[
+                { value: "", label: "Selecciona un empleado", disabled: true },
+                ...employees.map((s) => ({
+                  value: s.id,
+                  label: s.title,
+                })),
+              ]}
+            />
           </div>
 
         </div>

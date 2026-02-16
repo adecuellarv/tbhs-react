@@ -3,39 +3,60 @@ import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { store } from "./store";
-import "./index.css";
-import 'driver.js/dist/driver.css';
 import App from "./App.jsx";
-// Opcional si usas rutas y no tienes rewrites en Apache/Nginx:
-// import { HashRouter } from "react-router-dom";
 
+// Importa estilos como string (para inyectarlos en el shadow)
+import baseStyles from "./index.css?inline";
+import driverStyles from "driver.js/dist/driver.css?inline";
+
+// Función para inyectar estilos dentro del Shadow DOM
+function injectStyles(shadowRoot) {
+  const style = document.createElement("style");
+  style.textContent = baseStyles + driverStyles;
+  shadowRoot.appendChild(style);
+}
+
+// Montaje principal
 function mount() {
-  // Prioriza el id que pusiste en la vista; fallback al anterior
-  const el =
+  const host =
     document.getElementById("root-tbhs") ||
     document.getElementById("agenda-root");
 
-  if (!el) {
+  if (!host) {
     console.error("No encontré #root-tbhs ni #agenda-root en el DOM.");
     return;
   }
 
-  // Datos que inyectas desde la vista de CodeIgniter
+  // Crear Shadow DOM si no existe
+  if (!host.__shadowRoot) {
+    host.__shadowRoot = host.attachShadow({ mode: "open" });
+    injectStyles(host.__shadowRoot); // inyecta estilos al shadow
+  }
+
+  // Crear nodo dentro del shadow
+  let mountPoint = host.__shadowRoot.querySelector("#react-shadow-root");
+  if (!mountPoint) {
+    mountPoint = document.createElement("div");
+    mountPoint.id = "react-shadow-root";
+    host.__shadowRoot.appendChild(mountPoint);
+  }
+
+  // Evita múltiples roots
+  if (!mountPoint.__reactRoot) {
+    mountPoint.__reactRoot = createRoot(mountPoint);
+  }
+
   const bootstrap = window.__BOOTSTRAP__ || {};
   const baseUrl = window.__BASE_URL__ || "/";
 
-  // Evita crear múltiples roots si el script se carga dos veces
-  if (!el.__reactRoot) {
-    el.__reactRoot = createRoot(el);
-  }
-
-  el.__reactRoot.render(
+  mountPoint.__reactRoot.render(
     <StrictMode>
       <Provider store={store}>
-        {/* Si usas rutas en el cliente sin rewrites, descomenta: */}
-        {/* <HashRouter> */}
-          <App bootstrap={bootstrap} baseUrl={baseUrl} />
-        {/* </HashRouter> */}
+        <App
+          bootstrap={bootstrap}
+          baseUrl={baseUrl}
+          shadowRoot={host.__shadowRoot} // pasamos el shadowRoot como prop
+        />
       </Provider>
     </StrictMode>
   );
