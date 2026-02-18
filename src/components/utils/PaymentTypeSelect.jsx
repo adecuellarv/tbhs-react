@@ -1,5 +1,5 @@
 
-const opcionesSolas = [
+export const opcionesSolas = [
   { id: 1, nombre: "Efectivo" },
   { id: 2, nombre: "Cheques" },
   { id: 4, nombre: "Transferencia" },

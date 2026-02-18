@@ -367,6 +367,16 @@ const CalendarManager = () => {
     fetchTerminals();
   }, []);
 
+  useEffect(() => {
+    const onCart = (e) => {
+        handleAppointmentSave();
+    };
+
+    window.addEventListener('tbhs:cart', onCart);
+    return () => window.removeEventListener('tbhs:cart', onCart);
+  }, []);
+
+
   return (
     <div className="h-screen bg-gray-50">
       {/* Header */}

@@ -8,6 +8,7 @@ import AnticiposForm from './AnticiposForm';
 import { deleteApointment, deleteAdvance, getAppoinments } from '../../../api/calendar';
 import { setEvents, setEvent, setOpenModalEdit } from "../../../store/clientsSlice";
 import { mapCitaToEvent, mergeDefined, normalizeToISOZ } from '../../../helpers/calendar';
+import { opcionesSolas } from '../../utils/PaymentTypeSelect';
 
 const SummaryAppointment = ({
   selectedClient,
@@ -95,6 +96,12 @@ const SummaryAppointment = ({
   const handleCancel = () => {
     setOpen(false);
   };
+
+  const getTipoPagoDesc = (id) => {
+    const findTipo = opcionesSolas?.find(i => i.id === Number(id));
+    if (findTipo) return findTipo?.nombre
+    else return 'Pago'
+  }
 
   useEffect(() => {
     if (events?.length) {
@@ -219,7 +226,7 @@ const SummaryAppointment = ({
                           <div className="text-xs text-gray-400 truncate">
                             {p.tipo_pago_descripcion
                               ? p.tipo_pago_descripcion
-                              : `Tipo pago: ${p.tipo_pago}`}
+                              : `${getTipoPagoDesc(p.tipo_pago)}`}
                             {p.fecha_anticipo ? ` · ${p.fecha_anticipo}` : ""}
                           </div>
                         </div>

@@ -188,6 +188,7 @@ export default function EditAppointment({
     ? String(currentService.id_servicios_empresa)
     : undefined;
 
+  const now = dayjs();
   return (
     <>
       {/* Backdrop */}
@@ -268,7 +269,12 @@ export default function EditAppointment({
                 <DatePicker
                   value={date}
                   onChange={(val) => setDate(val)}
-                  slotProps={{ textField: { size: "small", fullWidth: true } }}
+                  //slotProps={{ textField: { size: "small", fullWidth: true } }}
+                  minDate={dayjs()}
+                  slotProps={{
+                    textField: { fullWidth: true, size: "small" },
+                    popper: { disablePortal: true, sx: { zIndex: 99999 } },
+                  }}
                 />
               </LocalizationProvider>
               <p className="text-xs text-gray-500">Cambia el <b>día</b> de la cita.</p>
@@ -282,7 +288,16 @@ export default function EditAppointment({
                   ampm={false}
                   value={time}
                   onChange={(val) => setTime(val)}
-                  slotProps={{ textField: { size: "small", fullWidth: true } }}
+                  //slotProps={{ textField: { size: "small", fullWidth: true } }}
+                  minTime={
+                    date && dayjs(date).isSame(now, "day")
+                      ? now
+                      : undefined
+                  }
+                  slotProps={{
+                    textField: { fullWidth: true, size: "small" },
+                    popper: { disablePortal: true, sx: { zIndex: 99999 } },
+                  }}
                 />
               </LocalizationProvider>
               <p className="text-xs text-gray-500">
@@ -293,7 +308,7 @@ export default function EditAppointment({
           {/* Editar empleado */}
           <div className="space-y-2">
             <Label icon={UserCog}>Editar empleado</Label>
-   
+
 
             <Select
               showSearch
