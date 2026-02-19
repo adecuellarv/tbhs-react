@@ -34,19 +34,20 @@ const CalendarHeader = ({
             setTypeCalendar={setTypeCalendar}
           />
 
-          <button onClick={goToPrevious} className="p-1 hover:bg-gray-100 rounded">
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+          <div className='flex'>
+            <button onClick={goToPrevious} className="p-1 hover:bg-gray-100 rounded">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
 
-          {/* El DatePicker ocupa ancho completo en móvil */}
-          <div className="min-w-[180px] sm:min-w-[220px] w-full sm:w-auto text-center" >
-            <h1>{date ? formatDate(date, "DD/MM/YYYY") : ''}</h1>
+            <div className="min-w-[180px] sm:min-w-[220px] w-full sm:w-auto text-center" >
+              <h1>{date ? formatDate(date, "DD/MM/YYYY") : ''}</h1>
+            </div>
+
+
+            <button onClick={goToNext} className="p-1 hover:bg-gray-100 rounded">
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
-
-
-          <button onClick={goToNext} className="p-1 hover:bg-gray-100 rounded">
-            <ChevronRight className="w-5 h-5" />
-          </button>
 
           <button
             onClick={goToToday}

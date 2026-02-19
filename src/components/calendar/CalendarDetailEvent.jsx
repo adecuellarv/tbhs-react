@@ -28,7 +28,7 @@ const CalendarDetailEvent = ({ arg, clients }) => {
       {/* Header: hora + badges */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 font-semibold">
-          <Clock className="w-4 h-4" />
+          <Clock className="w-3.5 h-3.5" />
           <span>{timeText}</span>
         </div>
 
@@ -45,9 +45,8 @@ const CalendarDetailEvent = ({ arg, clients }) => {
       {/* Servicio */}
       {xp?.descripcion &&
         <div className="mt-1.5 flex items-start gap-1.5 ">
-          <Scissors className="w-4 h-4 mt-[2px] shrink-0" />
+          <Scissors className="w-3.5 h-3.5 shrink-0" />
           <div className="truncate">
-            <span className="font-semibold">Servicio: </span>
             <span className="truncate">
               {event?.title}
               {xp?.descripcion ? ` - ${xp.descripcion}` : ""}
@@ -57,7 +56,7 @@ const CalendarDetailEvent = ({ arg, clients }) => {
       }
 
       {/* Cliente */}
-      {xp?.tiempo > 50 &&
+      {xp?.tiempo > 60 &&
         <div className="mt-1 flex items-start gap-1.5 ">
           <UserIcon className="w-4 h-4 mt-[2px] shrink-0" />
           <div className="min-w-0">
@@ -68,7 +67,7 @@ const CalendarDetailEvent = ({ arg, clients }) => {
       }
 
       {/* Acciones */}
-      {xp?.tiempo > 50 &&
+      {xp?.tiempo > 90 &&
         <div className="mt-2 flex items-center gap-2">
           {waHref ? (
             <a

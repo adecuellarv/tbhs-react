@@ -52,6 +52,7 @@ const CalendarManager = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showEditSchedule, setShowEditSchedule] = useState(false);
   const [date, setDate] = useState(dayjs());
+  const [eventsCalendar, setEventsCalendar] = useState([]);
   const [selectHoraInicio, setSelectHoraInicio] = useState('');
   const [selectHoraFin, setSelectHoraFin] = useState('');
   const [typeCalendar, setTypeCalendar] = useState('day');
@@ -281,9 +282,9 @@ const CalendarManager = () => {
     }
   }
 
-  const fetchEventsForDay = async (isoDay) => {
+  const fetchEventsForDay = async (isoDay, employeeId = null) => {
     try {
-      const resp = await getAppoinments({ fecha: isoDay });
+      const resp = await getAppoinments({ fecha: isoDay, empleado: employeeId });
       const citas = resp?.citas ?? [];
       const eventsList = citas.map(mapCitaToEvent);
       dispatch(setEvents(eventsList));
@@ -352,15 +353,24 @@ const CalendarManager = () => {
     if (!api) return;
 
     api.removeAllEvents();
-    if (events?.length) {
-      api.addEventSource(events);
+    if (eventsCalendar?.length) {
+      api.addEventSource(eventsCalendar);
     }
-  }, [employees, events]);
+  }, [employees, eventsCalendar]);
 
   useEffect(() => {
     const api = calendarRef.current?.getApi();
     if (api) api.changeView(responsiveView);
   }, [responsiveView]);
+
+  useEffect(() => {
+    if(!isMobile){
+      setEventsCalendar(events);
+    } else {
+      const filter = events?.filter(i => Number(i?.extendedProps?.id_usuario) === Number(mobileEmployeeId));
+      setEventsCalendar(filter);
+    }
+  }, [events, isMobile, mobileEmployeeId])
 
   useEffect(() => {
     fetchClients();
@@ -428,7 +438,7 @@ const CalendarManager = () => {
           initialView={responsiveView}
           headerToolbar={false}
           resources={resourcesForCalendar}
-          events={events}
+          events={eventsCalendar}
           selectable={true}
           selectMirror={true}
           select={handleDateSelect}
