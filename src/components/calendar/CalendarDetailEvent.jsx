@@ -26,24 +26,26 @@ const CalendarDetailEvent = ({ arg, clients }) => {
   return (
     <div className={`group   shadow-sm transition-shadow ${xp?.descripcion ? 'p-2' : ''} text-[13px] leading-snug h-full`} style={{ borderLeft: '15px solid #67e8b8ff' }}>
       {/* Header: hora + badges */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 font-semibold">
-          <Clock className="w-3.5 h-3.5" />
-          <span>{timeText}</span>
-        </div>
+      {xp?.tiempo > 20 &&
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 font-semibold">
+            <Clock className="w-3.5 h-3.5" />
+            <span>{timeText}</span>
+          </div>
 
-        <div className="flex items-center gap-1.5">
-          {anticipoPagado && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[11px] font-medium">
-              <CircleDollarSign className="w-3.5 h-3.5" />
-              {anticipoMonto ? `Anticipo $${anticipoMonto.toLocaleString()}` : "Anticipo pagado"}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5">
+            {anticipoPagado && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[11px] font-medium">
+                <CircleDollarSign className="w-3.5 h-3.5" />
+                {anticipoMonto ? `Anticipo $${anticipoMonto.toLocaleString()}` : "Anticipo pagado"}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      }
 
       {/* Servicio */}
-      {xp?.descripcion &&
+      {xp?.descripcion && xp?.tiempo > 20 &&
         <div className="mt-1.5 flex items-start gap-1.5 ">
           <Scissors className="w-3.5 h-3.5 shrink-0" />
           <div className="truncate">
@@ -52,6 +54,13 @@ const CalendarDetailEvent = ({ arg, clients }) => {
               {xp?.descripcion ? ` - ${xp.descripcion}` : ""}
             </span>
           </div>
+        </div>
+      }
+      {xp?.tiempo <= 20 &&
+        <div className="mt-[-5px]">
+          {event?.title?.length > 15
+            ? event.title.slice(0, 15) + '...'
+            : event?.title}
         </div>
       }
 

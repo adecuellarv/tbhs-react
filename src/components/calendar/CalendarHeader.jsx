@@ -21,7 +21,7 @@ const CalendarHeader = ({
   selectHoraFin,
   setSelectHoraFin,
   handleSaveSchedule,
-  start,
+  //start,
   addEmployee
 }) => {
   return (
@@ -100,7 +100,7 @@ const CalendarHeader = ({
           {false &&
             <div>
               <button
-                onClick={start}
+                //onClick={start}
                 className="flex gap-2 rounded-md px-3 py-1 text-sm bg-blue-200 text-black ml-20 cursor-pointer"
               >
                 <HelpCircleIcon size={18} /> Ayuda / Tour

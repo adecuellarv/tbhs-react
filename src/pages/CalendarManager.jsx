@@ -61,7 +61,7 @@ const CalendarManager = () => {
   const employees = useSelector((state) => state?.appointment?.employees);
   const openModalEdit = useSelector((state) => state?.appointment?.openModalEdit);
   const events = useSelector((state) => state?.appointment?.events);
-  const steps = useMemo(() => (TOUR), []);
+  //const steps = useMemo(() => (TOUR), []);
 
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(max-width: 1024px)');
@@ -95,10 +95,10 @@ const CalendarManager = () => {
     }
   }, [isMobile, employees, mobileEmployeeId]);
 
-  const { start } = useDriverTour(steps, {
+  /*const { start } = useDriverTour(steps, {
     runOnMount: true,
     storageKey: 'tour_home_v1_seen',
-  });
+  });*/
   //const [clients, setClients] = useState([]);
 
   const addEmployee = () => {
@@ -408,7 +408,7 @@ const CalendarManager = () => {
         selectHoraFin={selectHoraFin}
         setSelectHoraFin={setSelectHoraFin}
         handleSaveSchedule={handleSaveSchedule}
-        start={start}
+        //start={start}
         addEmployee={addEmployee}
       />
 
