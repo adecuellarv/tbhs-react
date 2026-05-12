@@ -61,6 +61,8 @@ const AddClient = ({ back, setSelectedClient }) => {
           id: i?.id_cliente,
           name: i?.nombre?.toLowerCase(),
           email: i?.email,
+          lada: i?.lada,
+          phone: i?.telefono,
           avatar: getInitials(i.nombre)
         }
 

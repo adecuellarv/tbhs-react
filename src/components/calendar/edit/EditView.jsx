@@ -64,7 +64,7 @@ const EditView = () => {
 
 
       //whatsapp
-      const phoneMX = findClient?.phone ? toMXPhone(findClient.phone) : null;
+      const phoneMX = findClient?.phone ? toMXPhone(findClient) : null;
       setWaHref(phoneMX
         ? buildWhatsAppUrl({
           phone: phoneMX,

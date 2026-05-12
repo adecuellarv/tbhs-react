@@ -6,7 +6,7 @@ const CalendarDetailEvent = ({ arg, clients }) => {
   //const xp = event?.extendedProps || {};
   const client = getClientInfo(arg.event.extendedProps.id_cliente, clients);
   //console.log('#client', client, arg.event.extendedProps)
-  const phoneMX = client?.phone ? toMXPhone(client.phone) : null;
+  const phoneMX = client?.phone ? toMXPhone(client) : null;
   const xp = arg.event.extendedProps;
 
   // Anticipo: asumo que viene como número en xp.anticipo o boolean xp.anticipo_pagado

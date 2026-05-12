@@ -321,6 +321,7 @@ const CalendarManager = () => {
           name: i?.nombre?.toLowerCase(),
           email: i?.email,
           avatar: getInitials(i.nombre),
+          lada: i?.lada,
           phone: i?.telefono
         }
 

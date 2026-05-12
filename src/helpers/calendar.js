@@ -108,15 +108,12 @@ export const formatDate = (date, format) => {
 
 export const getClientById = (clients, id) => clients?.find(c => c?.id === id);
 export const onlyDigits = (str = "") => (str || "").replace(/\D+/g, "");
-export const toMXPhone = (raw = "") => {
-  const digits = onlyDigits(raw);
-  // Si viene a 10 dígitos, le agregamos +52
-  if (digits.length === 10) return `52${digits}`;
-  // Si ya viene con 52, lo respetamos
-  if (digits.startsWith("52")) return digits;
-  return digits; // fallback
-};
+export const toMXPhone = (raw) => {
+  const lada = onlyDigits(raw?.lada || "52");
+  const telefono = onlyDigits(raw?.phone || "");
 
+  return `${lada}${telefono}`;
+};
 export const buildWhatsAppUrl = ({ phone, name, dateText, timeText, service, descripcion }) => {
   const base = "https://wa.me/";
   const text = `Hola ${name || ""}, te escribimos para tu cita del ${dateText} a las ${timeText} (${service}${descripcion ? " - " + descripcion : ""}).`;
