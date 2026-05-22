@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast"
 import AnticiposForm from './AnticiposForm';
 import { deleteApointment, deleteAdvance, getAppoinments } from '../../../api/calendar';
 import { setEvents, setEvent, setOpenModalEdit } from "../../../store/clientsSlice";
-import { mapCitaToEvent, mergeDefined, normalizeToISOZ } from '../../../helpers/calendar';
+import { mapCitaToEvent, mergeDefined, normalizeToISOZ, isPaidAppointment } from '../../../helpers/calendar';
 import { opcionesSolas } from '../../utils/PaymentTypeSelect';
 
 const SummaryAppointment = ({
@@ -25,6 +25,7 @@ const SummaryAppointment = ({
   const [selectedAnticipo, setSelectedAnticipo] = useState(null);
   const dateCalendar = useSelector((state) => state?.appointment?.dateCalendar);
   const events = useSelector((state) => state?.appointment?.events);
+  const isPaid = isPaidAppointment(event);
 
   const refreshCalendarData = async () => {
     try {
@@ -197,10 +198,12 @@ const SummaryAppointment = ({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    if (isPaid) return;
                     setOpenAddAnticipo(true);
                   }}
-                  className="rounded-full p-1 hover:bg-blue-800 bg-blue-600 text-white cursor-pointer"
+                  className={`rounded-full p-1 text-white ${isPaid ? 'bg-gray-300 cursor-not-allowed' : 'hover:bg-blue-800 bg-blue-600 cursor-pointer'}`}
                   title="Agregar"
+                  disabled={isPaid}
                 >
                   <PlusIcon className="w-4 h-4" />
                 </button>
@@ -230,7 +233,7 @@ const SummaryAppointment = ({
                             {p.fecha_anticipo ? ` · ${p.fecha_anticipo}` : ""}
                           </div>
                         </div>
-                        {p?.id_venta === null && p?.tipo_pago !== "Mercado Pago" && p?.corte === "0" &&
+                        {!isPaid && p?.id_venta === null && p?.tipo_pago !== "Mercado Pago" && p?.corte === "0" &&
                           <button
                             type="button"
                             aria-label={`Eliminar anticipo ${p.id_anticipo}`}
@@ -268,10 +271,13 @@ const SummaryAppointment = ({
       <div className="flex flex-col mt-10">
         <button
           type="button"
-          onClick={() => advanceAmount ? toast.error('Elimina primero los anticipos') : setOpen(true)}
-          className={`mt-auto inline-flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 cursor-pointer ${advanceAmount ? 'bg-gray-400' : 'bg-red-700'} text-white`}
+          onClick={() => {
+            if (isPaid) return;
+            advanceAmount ? toast.error('Elimina primero los anticipos') : setOpen(true)
+          }}
+          className={`mt-auto inline-flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 ${isPaid || advanceAmount ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-700 cursor-pointer'} text-white`}
           title="Eliminar"
-        //disabled={advanceAmount}
+          disabled={isPaid}
         >
           <Trash2 className="w-4 h-4" />
           <span>Eliminar</span>

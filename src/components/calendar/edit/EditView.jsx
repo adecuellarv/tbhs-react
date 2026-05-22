@@ -7,7 +7,7 @@ import { Button } from '../../utils/Button';
 import SummaryAppointment from './SummaryAppointment';
 import EditAppointment from './EditAppointment';
 import { setOpenModalEdit } from '../../../store/clientsSlice';
-import { formatTime, formatDate, toMXPhone, buildWhatsAppUrl } from '../../../helpers/calendar';
+import { formatTime, formatDate, toMXPhone, buildWhatsAppUrl, getAppointmentStatusClassName, getAppointmentStatusLabel, isPaidAppointment } from '../../../helpers/calendar';
 
 import "dayjs/locale/es";
 dayjs.locale("es");
@@ -25,6 +25,8 @@ const EditView = () => {
   const clients = useSelector((state) => state?.appointment?.clients);
   const event = useSelector((state) => state?.appointment?.event);
   const isOpen = useSelector((state) => state?.appointment?.openModalEdit);
+  const isPaid = isPaidAppointment(event);
+  const statusLabel = getAppointmentStatusLabel(event);
 
   if (!isOpen) return null;
 
@@ -139,6 +141,11 @@ const EditView = () => {
                       <div className="text-xs text-blue-600 mt-1">
                         {selectedSlot?.employeeName}
                       </div>
+                      <div className="mt-2">
+                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getAppointmentStatusClassName(event)}`}>
+                          {statusLabel}
+                        </span>
+                      </div>
 
                       {waHref &&
                         <div className='mt-2'>
@@ -162,15 +169,17 @@ const EditView = () => {
                   </div>
                 }
                 <div className='text-right mt-3 mr-6'>
-                  <Button
-                    type="primary"
-                    size='small'
-                    icon={<Pencil size={14} />}
-                    onClick={() => setShowEdit(true)}
-                    style={{ padding: 10 }}
-                  >
-                    Editar Datos de cita
-                  </Button>
+                  {!isPaid && (
+                    <Button
+                      type="primary"
+                      size='small'
+                      icon={<Pencil size={14} />}
+                      onClick={() => setShowEdit(true)}
+                      style={{ padding: 10 }}
+                    >
+                      Editar Datos de cita
+                    </Button>
+                  )}
 
                 </div>
                 <SummaryAppointment

@@ -16,7 +16,7 @@ import CalendarDetailEvent from '../components/calendar/CalendarDetailEvent';
 import CalendarHeader from '../components/calendar/CalendarHeader';
 import { getEmployees, getAppoinments, getSchedule, getBankTerminals, updateAppointment } from '../api/calendar';
 import { getClients } from '../api/clients';
-import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, handleSlotLaneMount, isBlockedByPermiso } from '../helpers/calendar';
+import { getInitials, mapCitaToEvent, getScheduleDay, horas, VIEW_MAP, handleSlotLaneMount, isBlockedByPermiso, isPaidAppointment } from '../helpers/calendar';
 import { setClientsList, setTerminals, setEmployees, setEvent, setDateCalendar, setOpenModalEdit, setEvents } from '../store/clientsSlice';
 import { useDriverTour } from '../hooks/useDriverTour';
 import { TOUR } from '../constans/tour';
@@ -201,6 +201,11 @@ const CalendarManager = () => {
 
   const handleEventDrop = async (info) => {
     const ev = info.event;
+    if (isPaidAppointment(ev.extendedProps)) {
+      info.revert();
+      toast.error('La cita pagada no se puede editar');
+      return;
+    }
 
     // Recurso/empleado destino (si usas resources)
     const resource = ev.getResources?.()[0] ?? null;
@@ -227,6 +232,11 @@ const CalendarManager = () => {
 
   const handleEventResize = async (info) => {
     const ev = info.event;
+    if (isPaidAppointment(ev.extendedProps)) {
+      info.revert();
+      toast.error('La cita pagada no se puede editar');
+      return;
+    }
 
     const payload = {
       id: ev.id,
@@ -469,6 +479,8 @@ const CalendarManager = () => {
 
           // (Opcional) Reglas para permitir/denegar drop/resize
           eventAllow={(dropInfo, draggedEvent) => {
+            if (isPaidAppointment(draggedEvent?.extendedProps)) return false;
+
             const s = dayjs(dropInfo.start);
             const e = dropInfo.end ? dayjs(dropInfo.end) : s.add(15, 'minute');
 

@@ -30,7 +30,35 @@ export const getInitials = (fullName = '') => {
   return ((first[0] || '') + (last[0] || '')).toUpperCase();
 }
 
+export const APPOINTMENT_STATUS_LABELS = {
+  4: 'Espera',
+  5: 'Vigente',
+  6: 'Cancelado',
+  7: 'Pagado',
+};
+
+export const APPOINTMENT_STATUS_STYLES = {
+  4: 'bg-amber-100 text-amber-800 border-amber-200',
+  5: 'bg-blue-100 text-blue-800 border-blue-200',
+  6: 'bg-red-100 text-red-800 border-red-200',
+  7: 'bg-green-100 text-green-800 border-green-200',
+};
+
+export const getAppointmentStatusId = (appointment) => Number(appointment?.id_estatus);
+
+export const getAppointmentStatusLabel = (appointment) =>
+  APPOINTMENT_STATUS_LABELS[getAppointmentStatusId(appointment)] || 'Sin estatus';
+
+export const getAppointmentStatusClassName = (appointment) =>
+  APPOINTMENT_STATUS_STYLES[getAppointmentStatusId(appointment)] || 'bg-gray-100 text-gray-700 border-gray-200';
+
+export const isPaidAppointment = (appointment) => getAppointmentStatusId(appointment) === 7;
+
 const paletteFor = (cita) => {
+  if (isPaidAppointment(cita)) {
+    return { bg: '#16a34a', border: '#15803d', color: '#fff' };
+  }
+
   return cita?.tiene_anticipo
     ? { bg: '#648ab5ff', border: '#1653a3ff', color: '#000' }
     : { bg: '#165874', border: '#4c7d92', color: '#fff ' };
@@ -46,7 +74,8 @@ export const mapCitaToEvent = (c) => {
     (c.descripcion && c.descripcion.trim()) ||
     'Servicio';
 
-  const { bg, border } = paletteFor(c);
+  const { bg, border, color } = paletteFor(c);
+  const isPaid = isPaidAppointment(c);
 
   return {
     id: String(c.id_agenda),
@@ -56,9 +85,15 @@ export const mapCitaToEvent = (c) => {
     end: end.format('YYYY-MM-DDTHH:mm:ss'),
     backgroundColor: bg,
     borderColor: border,
+    textColor: color,
+    editable: !isPaid,
+    startEditable: !isPaid,
+    durationEditable: !isPaid,
+    resourceEditable: !isPaid,
 
     extendedProps: {
       ...{ tiene_anticipo: Boolean(c.tiene_anticipo) },
+      id_estatus: getAppointmentStatusId(c),
       ...c
     }
   };

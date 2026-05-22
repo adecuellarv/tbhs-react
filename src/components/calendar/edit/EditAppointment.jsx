@@ -13,7 +13,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { setEvents } from "../../../store/clientsSlice";
-import { getClientInfo, mapCitaToEvent } from "../../../helpers/calendar";
+import { getClientInfo, isPaidAppointment, mapCitaToEvent } from "../../../helpers/calendar";
 import { editAppointmentFull, getAppoinments } from "../../../api/calendar";
 import { getServices } from "../../../api/services";
 import Header from "./Header";
@@ -75,8 +75,10 @@ export default function EditAppointment({
   const { extendedProps = {} } = event;
   const servicio = extendedProps?.servicio || event?.title || "Servicio";
   const idAgenda = extendedProps?.id_agenda || event?.id;
+  const isPaid = isPaidAppointment(event);
 
   const handleUpdate = async () => {
+    if (isPaid) return;
     if (!startDateTime || !endDateTime || !employeeId || !selectedClient?.id) return;
     setSubmitting(true);
 
@@ -227,11 +229,13 @@ export default function EditAppointment({
                     : "Sin cliente"}
               </div>
               <button
-                className="text-sm px-3 py-1.5 rounded-md bg-gray-300  hover:bg-gray-200 cursor-pointer"
+                className={`text-sm px-3 py-1.5 rounded-md ${isPaid ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-200 cursor-pointer'}`}
                 onClick={() => {
+                  if (isPaid) return;
                   setClientPanelOpen(true);
                   setAddClientModal(false);
                 }}
+                disabled={isPaid}
               >
                 Cambiar cliente
               </button>
@@ -247,7 +251,7 @@ export default function EditAppointment({
               placeholder="Buscar servicio…"
               value={value}
               onChange={handleChangeSelect}
-              disabled={event?.tiene_anticipo}
+              disabled={event?.tiene_anticipo || isPaid}
               getPopupContainer={(triggerNode) => triggerNode.parentNode} // o document.body
               options={[
                 { value: "", label: "Selecciona un servicio", disabled: true },
@@ -269,6 +273,7 @@ export default function EditAppointment({
                 <DatePicker
                   value={date}
                   onChange={(val) => setDate(val)}
+                  disabled={isPaid}
                   //slotProps={{ textField: { size: "small", fullWidth: true } }}
                   minDate={dayjs()}
                   slotProps={{
@@ -288,6 +293,7 @@ export default function EditAppointment({
                   ampm={false}
                   value={time}
                   onChange={(val) => setTime(val)}
+                  disabled={isPaid}
                   //slotProps={{ textField: { size: "small", fullWidth: true } }}
                   minTime={
                     date && dayjs(date).isSame(now, "day")
@@ -317,6 +323,7 @@ export default function EditAppointment({
               placeholder="Buscar empleado"
               value={employeeId}
               onChange={(e) => setEmployeeId(e)}
+              disabled={isPaid}
               getPopupContainer={(triggerNode) => triggerNode.parentNode} // o document.body
               options={[
                 { value: "", label: "Selecciona un empleado", disabled: true },
@@ -341,7 +348,7 @@ export default function EditAppointment({
           </button>
           <button
             onClick={handleUpdate}
-            disabled={submitting || !startDateTime || !endDateTime || !employeeId || !selectedClient?.id}
+            disabled={isPaid || submitting || !startDateTime || !endDateTime || !employeeId || !selectedClient?.id}
             className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
           >
             {submitting ? "Guardando..." : "Guardar cambios"}

@@ -1,4 +1,4 @@
-import { toMXPhone, getClientInfo, buildWhatsAppUrl } from "../../helpers/calendar";
+import { toMXPhone, getClientInfo, buildWhatsAppUrl, isPaidAppointment } from "../../helpers/calendar";
 import { Clock, User as UserIcon, MessageCircle, CircleDollarSign, Scissors } from 'lucide-react';
 
 const CalendarDetailEvent = ({ arg, clients }) => {
@@ -12,6 +12,7 @@ const CalendarDetailEvent = ({ arg, clients }) => {
   // Anticipo: asumo que viene como número en xp.anticipo o boolean xp.anticipo_pagado
   const anticipoMonto = xp?.anticipo?.monto_neto;
   const anticipoPagado = xp?.tiene_anticipo;
+  const isPaid = isPaidAppointment(xp);
 
   const waHref = phoneMX
     ? buildWhatsAppUrl({
@@ -34,6 +35,12 @@ const CalendarDetailEvent = ({ arg, clients }) => {
           </div>
 
           <div className="flex items-center gap-1.5">
+            {isPaid && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-[11px] font-medium">
+                <CircleDollarSign className="w-3.5 h-3.5" />
+                Pagado
+              </span>
+            )}
             {anticipoPagado && (
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[11px] font-medium">
                 <CircleDollarSign className="w-3.5 h-3.5" />
