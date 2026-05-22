@@ -70,6 +70,7 @@ export default function EditAppointment({
   const [time, setTime] = useState(initialStart);
   const [tiempoMin, setTiempoMin] = useState(event?.tiempo);
   const [employeeId, setEmployeeId] = useState(initialEmployee);
+  const [observaciones, setObservaciones] = useState(event?.observaciones);
 
 
   const { extendedProps = {} } = event;
@@ -91,7 +92,7 @@ export default function EditAppointment({
         id_usuario: employeeId,
         id_cliente: selectedClient.id,
         id_servicio: currentService?.id_servicios_empresa ? currentService?.id_servicios_empresa : currentService,
-        observaciones: extendedProps?.descripcion,
+        observaciones,
       };
 
       const ok = await editAppointmentFull(payload);
@@ -162,10 +163,11 @@ export default function EditAppointment({
   useEffect(() => {
     setDate(initialDate);
     setTime(initialStart);
+    setObservaciones(event?.observaciones || "");
     //setEmployeeId(initialEmployee);
     //setSelectedClient(initialClient);
     //setAdvances(initialAdvances);
-  }, [initialDate, initialStart]);
+  }, [initialDate, initialStart, event]);
 
   useEffect(() => {
     if (event?.id_cliente && clients?.length) {
@@ -332,6 +334,18 @@ export default function EditAppointment({
                   label: s.title,
                 })),
               ]}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Observaciones</Label>
+            <textarea
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              disabled={isPaid}
+              rows={4}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+              placeholder="Agrega observaciones de la cita"
             />
           </div>
 

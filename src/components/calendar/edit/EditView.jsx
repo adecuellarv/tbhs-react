@@ -27,6 +27,7 @@ const EditView = () => {
   const isOpen = useSelector((state) => state?.appointment?.openModalEdit);
   const isPaid = isPaidAppointment(event);
   const statusLabel = getAppointmentStatusLabel(event);
+  const comments = event?.observaciones;
 
   if (!isOpen) return null;
 
@@ -164,6 +165,13 @@ const EditView = () => {
                       }
 
                     </div>
+
+                    {comments && (
+                      <div className="mb-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <div className="text-xs font-semibold text-gray-500">Observaciones</div>
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700">{comments}</p>
+                      </div>
+                    )}
 
 
                   </div>
