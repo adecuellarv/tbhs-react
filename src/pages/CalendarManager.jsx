@@ -7,7 +7,6 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import esLocale from "@fullcalendar/core/locales/es";
 import { useDispatch, useSelector } from 'react-redux'
 import dayjs from 'dayjs';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { toast } from 'react-hot-toast';
 import AppointmentModal from '../components/calendar/AddAppointmentModal';
 import EditView from '../components/calendar/edit/EditView';
@@ -160,7 +159,9 @@ const CalendarManager = () => {
 
   const handlePickerChange = (newValue) => {
     if (!newValue) return;
-    goto(newValue.startOf('day'));
+    const nextDate = dayjs(newValue);
+    if (!nextDate.isValid()) return;
+    goto(nextDate.startOf('day'));
   };
 
   const handleEventClick = (clickInfo) => {
@@ -405,7 +406,6 @@ const CalendarManager = () => {
         typeCalendar={typeCalendar}
         setTypeCalendar={setTypeCalendar}
         goToPrevious={goToPrevious}
-        AdapterDayjs={AdapterDayjs}
         date={date}
         handlePickerChange={handlePickerChange}
         goToNext={goToNext}

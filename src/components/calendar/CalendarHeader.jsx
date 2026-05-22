@@ -1,13 +1,13 @@
+import { useRef } from 'react';
 import { Plus, ChevronLeft, ChevronRight, Settings, PenIcon, HelpCircleIcon } from 'lucide-react';
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import CalendarSelect from '../utils/CalendarSelect';
-import { formatDate } from '../../helpers/calendar';
 
 const CalendarHeader = ({
   typeCalendar,
   setTypeCalendar,
   goToPrevious,
-  AdapterDayjs,
   date,
   handlePickerChange,
   goToNext,
@@ -24,6 +24,13 @@ const CalendarHeader = ({
   //start,
   addEmployee
 }) => {
+  const datePickerHostRef = useRef(null);
+
+  const getPickerContainer = () => {
+    const root = datePickerHostRef.current?.getRootNode?.();
+    return root?.querySelector?.("#react-shadow-root") || document.body;
+  };
+
   return (
     <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
@@ -34,13 +41,43 @@ const CalendarHeader = ({
             setTypeCalendar={setTypeCalendar}
           />
 
-          <div className='flex'>
+          <div className='flex items-center'>
             <button onClick={goToPrevious} className="p-1 hover:bg-gray-100 rounded">
               <ChevronLeft className="w-5 h-5" />
             </button>
 
-            <div className="min-w-[180px] sm:min-w-[220px] w-full sm:w-auto text-center" >
-              <h1>{date ? formatDate(date, "DD/MM/YYYY") : ''}</h1>
+            <div ref={datePickerHostRef} className="min-w-[180px] sm:min-w-[220px] w-full sm:w-auto">
+              <DatePicker
+                value={date}
+                onChange={handlePickerChange}
+                onAccept={handlePickerChange}
+                format="DD/MM/YYYY"
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    fullWidth: true,
+                    inputProps: { className: "text-center" },
+                    sx: {
+                      "& .MuiInputBase-root": {
+                        height: 34,
+                        borderRadius: "8px",
+                        backgroundColor: "#fff",
+                      },
+                      "& .MuiInputBase-input": {
+                        padding: "7px 8px",
+                        textAlign: "center",
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                      },
+                    },
+                  },
+                  popper: {
+                    container: getPickerContainer,
+                    disablePortal: true,
+                    sx: { zIndex: 99999 },
+                  },
+                }}
+              />
             </div>
 
 
