@@ -24,27 +24,36 @@ const CalendarDetailEvent = ({ arg, clients }) => {
       descripcion: xp?.descripcion || ""
     })
     : null;
+
+  const serviceText = `${event?.title || ""}${xp?.descripcion ? ` - ${xp.descripcion}` : ""}`;
+
   return (
-    <div className={`group   shadow-sm transition-shadow ${xp?.descripcion ? 'p-2' : ''} text-[13px] leading-snug h-full`} style={{ borderLeft: '15px solid #67e8b8ff' }}>
+    <div
+      className="tbhs-event-card group h-full w-full min-w-0 overflow-hidden p-1.5 text-[12px] leading-snug shadow-sm transition-shadow"
+      style={{ borderLeft: '8px solid #67e8b8ff' }}
+      title={serviceText}
+    >
       {/* Header: hora + badges */}
       {xp?.tiempo > 20 &&
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 font-semibold">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{timeText}</span>
+        <div className="flex min-w-0 items-center justify-between gap-1">
+          <div className="flex min-w-0 items-center gap-1 font-semibold">
+            <Clock className="tbhs-event-time-icon h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{timeText}</span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="tbhs-event-badges flex min-w-0 shrink items-center justify-end gap-1 overflow-hidden">
             {isPaid && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-[11px] font-medium">
-                <CircleDollarSign className="w-3.5 h-3.5" />
-                Pagado
+              <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-800">
+                <CircleDollarSign className="h-3 w-3 shrink-0" />
+                <span className="tbhs-event-badge-text truncate">Pagado</span>
               </span>
             )}
             {anticipoPagado && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[11px] font-medium">
-                <CircleDollarSign className="w-3.5 h-3.5" />
-                {anticipoMonto ? `Anticipo $${anticipoMonto.toLocaleString()}` : "Anticipo pagado"}
+              <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">
+                <CircleDollarSign className="h-3 w-3 shrink-0" />
+                <span className="tbhs-event-badge-text truncate">
+                  {anticipoMonto ? `$${anticipoMonto.toLocaleString()}` : "Anticipo"}
+                </span>
               </span>
             )}
           </div>
@@ -52,39 +61,34 @@ const CalendarDetailEvent = ({ arg, clients }) => {
       }
 
       {/* Servicio */}
-      {xp?.descripcion && xp?.tiempo > 20 &&
-        <div className="mt-1.5 flex items-start gap-1.5 ">
-          <Scissors className="w-3.5 h-3.5 shrink-0" />
-          <div className="truncate">
-            <span className="truncate">
-              {event?.title}
-              {xp?.descripcion ? ` - ${xp.descripcion}` : ""}
-            </span>
+      {xp?.tiempo > 20 &&
+        <div className="mt-1 flex min-w-0 items-start gap-1">
+          <Scissors className="tbhs-event-service-icon h-3.5 w-3.5 shrink-0" />
+          <div className="min-w-0 flex-1 truncate">
+            {serviceText}
           </div>
         </div>
       }
       {xp?.tiempo <= 20 &&
-        <div className="mt-[-5px]">
-          {event?.title?.length > 15
-            ? event.title.slice(0, 15) + '...'
-            : event?.title}
+        <div className="min-w-0 truncate">
+          {event?.title}
         </div>
       }
 
       {/* Cliente */}
       {xp?.tiempo > 60 &&
-        <div className="mt-1 flex items-start gap-1.5 ">
-          <UserIcon className="w-4 h-4 mt-[2px] shrink-0" />
-          <div className="min-w-0">
+        <div className="tbhs-event-client mt-1 flex min-w-0 items-start gap-1">
+          <UserIcon className="mt-[2px] h-3.5 w-3.5 shrink-0" />
+          <div className="min-w-0 truncate">
             <span className="font-semibold">Cliente: </span>
-            <span className="truncate">{client?.name || client?.nombre || "—"}</span>
+            <span>{client?.name || client?.nombre || "—"}</span>
           </div>
         </div>
       }
 
       {/* Acciones */}
       {xp?.tiempo > 90 &&
-        <div className="mt-2 flex items-center gap-2">
+        <div className="tbhs-event-actions mt-2 flex items-center gap-2">
           {waHref ? (
             <a
               href={waHref}

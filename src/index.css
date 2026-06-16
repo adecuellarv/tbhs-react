@@ -23,3 +23,37 @@ body {
 .past-time-slot{
   background-color: #f0f0f0 !important; 
 }
+
+.fc .fc-event-main,
+.fc .fc-event-main-frame {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tbhs-event-card {
+  container-type: inline-size;
+}
+
+@container (max-width: 112px) {
+  .tbhs-event-card {
+    padding: 5px;
+    font-size: 11px;
+  }
+
+  .tbhs-event-card .tbhs-event-badge-text,
+  .tbhs-event-card .tbhs-event-time-icon,
+  .tbhs-event-card .tbhs-event-service-icon,
+  .tbhs-event-card .tbhs-event-client,
+  .tbhs-event-card .tbhs-event-actions {
+    display: none;
+  }
+
+  .tbhs-event-card .tbhs-event-badges {
+    gap: 2px;
+  }
+
+  .tbhs-event-card .tbhs-event-badges span {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+}

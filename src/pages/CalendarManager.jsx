@@ -8,6 +8,7 @@ import esLocale from "@fullcalendar/core/locales/es";
 import { useDispatch, useSelector } from 'react-redux'
 import dayjs from 'dayjs';
 import { toast } from 'react-hot-toast';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import AppointmentModal from '../components/calendar/AddAppointmentModal';
 import EditView from '../components/calendar/edit/EditView';
 import CalendarEmployeHeader from '../components/calendar/CalendarEmployeHeader';
@@ -56,6 +57,8 @@ const CalendarManager = () => {
   const [selectHoraFin, setSelectHoraFin] = useState('');
   const [typeCalendar, setTypeCalendar] = useState('day');
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [employeePage, setEmployeePage] = useState(0);
+  const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState('all');
   const clients = useSelector((state) => state?.appointment?.clients);
   const employees = useSelector((state) => state?.appointment?.employees);
   const openModalEdit = useSelector((state) => state?.appointment?.openModalEdit);
@@ -82,17 +85,55 @@ const CalendarManager = () => {
     return '200px';
   }, [isMobile, isTablet]);
 
+  const employeePageSize = useMemo(() => {
+    if (isMobile) return 1;
+    if (isTablet) return 4;
+    return 6;
+  }, [isMobile, isTablet]);
+
+  const totalEmployeePages = useMemo(() => {
+    return Math.max(1, Math.ceil((employees?.length || 0) / employeePageSize));
+  }, [employees, employeePageSize]);
+
   const resourcesForCalendar = useMemo(() => {
-    if (!isMobile) return employees;
+    if (!isMobile && selectedEmployeeFilter !== 'all') {
+      return employees.filter(e => String(e.id) === String(selectedEmployeeFilter));
+    }
+
+    const start = employeePage * employeePageSize;
+    if (!isMobile) return employees.slice(start, start + employeePageSize);
     if (!mobileEmployeeId) return [];
     return employees.filter(e => String(e.id) === String(mobileEmployeeId));
-  }, [isMobile, employees, mobileEmployeeId]);
+  }, [isMobile, employees, mobileEmployeeId, employeePage, employeePageSize, selectedEmployeeFilter]);
+
+  const employeeRangeText = useMemo(() => {
+    if (!employees?.length) return '0 de 0';
+    const start = employeePage * employeePageSize + 1;
+    const end = Math.min(employees.length, (employeePage + 1) * employeePageSize);
+    return `${start}-${end} de ${employees.length}`;
+  }, [employees, employeePage, employeePageSize]);
+
+  const goToPreviousEmployees = () => {
+    setEmployeePage((page) => Math.max(0, page - 1));
+  };
+
+  const goToNextEmployees = () => {
+    setEmployeePage((page) => Math.min(totalEmployeePages - 1, page + 1));
+  };
 
   useEffect(() => {
     if (isMobile && employees?.length && !mobileEmployeeId) {
       setMobileEmployeeId(String(employees[0].id));
     }
   }, [isMobile, employees, mobileEmployeeId]);
+
+  useEffect(() => {
+    setEmployeePage((page) => Math.min(page, totalEmployeePages - 1));
+  }, [totalEmployeePages]);
+
+  useEffect(() => {
+    setEmployeePage(0);
+  }, [selectedEmployeeFilter]);
 
   /*const { start } = useDriverTour(steps, {
     runOnMount: true,
@@ -440,7 +481,52 @@ const CalendarManager = () => {
       )}
 
       {/* Calendar */}
-      <div className="flex-1 p-2 sm:p-4 lg:p-6" data-tour="calendar">
+      <div
+        className="flex-1 p-2 sm:p-4 lg:p-6"
+        data-tour="calendar"
+      >
+        {!isMobile && (
+          <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
+            <select
+              className="h-8 min-w-[220px] rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-blue-400"
+              value={selectedEmployeeFilter}
+              onChange={(e) => setSelectedEmployeeFilter(e.target.value)}
+            >
+              <option value="all">Todos los empleados</option>
+              {employees?.map((employee) => (
+                <option key={employee.id} value={String(employee.id)}>
+                  {employee.title}
+                </option>
+              ))}
+            </select>
+
+            {selectedEmployeeFilter === 'all' && employees.length > employeePageSize && (
+              <>
+                <button
+                  type="button"
+                  onClick={goToPreviousEmployees}
+                  disabled={employeePage === 0}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  title="Empleados anteriores"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="min-w-[130px] text-center text-sm font-medium text-gray-600">
+                  Empleados {employeeRangeText}
+                </span>
+                <button
+                  type="button"
+                  onClick={goToNextEmployees}
+                  disabled={employeePage >= totalEmployeePages - 1}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  title="Siguientes empleados"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </>
+            )}
+          </div>
+        )}
         <FullCalendar
           schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
           ref={calendarRef}
