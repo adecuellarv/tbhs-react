@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { Select } from '../utils/Select';
 import { CircleChevronLeft } from 'lucide-react';
@@ -16,10 +16,25 @@ const AddClient = ({ back, setSelectedClient }) => {
   const [phone, setPhone] = useState('')
   const [phoneError, setPhoneError] = useState(false)
   const [recomended, setRecomended] = useState('')
-  const [clientCreated, setClientCreated] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const isValid = name && app && apm && gener && phone && !phoneError;
+
+  const mapClient = (client) => ({
+    id: client?.id_cliente ?? client?.id,
+    name: (client?.nombre ?? name)?.trim()?.toLowerCase(),
+    email: client?.email ?? '',
+    lada: client?.lada,
+    phone: client?.telefono ?? phone.trim(),
+    avatar: getInitials(client?.nombre ?? name)
+  });
+
+  const upsertClient = (client, list = clients) => {
+    const filteredClients = list.filter((item) => Number(item?.id) !== Number(client?.id));
+    const nextClients = [client, ...filteredClients];
+    dispatch(setClientsList(nextClients));
+    return nextClients;
+  };
 
   const handleSave = async () => {
     setLoading(true)
@@ -34,13 +49,18 @@ const AddClient = ({ back, setSelectedClient }) => {
 
     const resp = await createClient(values);
     if (resp) {
-      setClientCreated({
-        id: resp?.id_cliente,
-        name: name.trim(),
-        email: '',
-        avatar: getInitials(name.trim())
+      const createdClient = mapClient({
+        ...resp,
+        nombre: resp?.nombre ?? name.trim(),
+        telefono: resp?.telefono ?? phone.trim(),
       });
-      fetchClients();
+
+      upsertClient(createdClient);
+      const refreshedClients = await fetchClients(createdClient);
+      const selectedClient = refreshedClients.find((client) => Number(client?.id) === Number(createdClient?.id)) ?? createdClient;
+
+      setSelectedClient?.(selectedClient);
+      back?.();
     }
     setLoading(false)
   }
@@ -51,32 +71,21 @@ const AddClient = ({ back, setSelectedClient }) => {
     setPhoneError(!val);
   }
 
-  const fetchClients = async () => {
+  const fetchClients = async (fallbackClient) => {
     const resp = await getClients();
     const clientsList = resp ?? [];
-    if (clientsList?.length) {
-      const newArray = [];
-      clientsList?.map(i => {
-        const obj = {
-          id: i?.id_cliente,
-          name: i?.nombre?.toLowerCase(),
-          email: i?.email,
-          lada: i?.lada,
-          phone: i?.telefono,
-          avatar: getInitials(i.nombre)
-        }
+    const newArray = clientsList.map(mapClient);
 
-        newArray.push(obj)
-      })
-      dispatch(setClientsList(newArray))
+    if (fallbackClient && !newArray.some((client) => Number(client?.id) === Number(fallbackClient?.id))) {
+      newArray.unshift(fallbackClient);
     }
+
+    if (newArray?.length) {
+      dispatch(setClientsList(newArray));
+    }
+
+    return newArray;
   }
-
-  useEffect(() => {
-    if (clientCreated && clients?.length) {
-      back();
-    }
-  }, [clientCreated, clients])
 
   return (
     <div>

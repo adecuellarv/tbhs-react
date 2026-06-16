@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { X, Clock, Calendar } from 'lucide-react';
 import dayjs from "dayjs";
-import moment from "moment";
 import ClientSelection from './steps/ClientSelection';
 import ServiceSelection from './steps/ServiceSelection';
 import ServicesList from './steps/ServicesList';
@@ -20,7 +19,7 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
   const [currentStep, setCurrentStep] = useState('client'); // 'client', 'services', 'cart'
   const [selectedClient, setSelectedClient] = useState(null);
   const [selectedServices, setSelectedServices] = useState([]);
-  const [endAppoiment, setEndAppoiment] = useState('');
+  const [endAppoiment] = useState('');
   const [day, setDay] = useState('');
   const [advanceAmount, setAdvanceAmount] = useState(0);
   const [payment, setPayment] = useState(1);
@@ -234,7 +233,13 @@ const AppointmentModal = ({ isOpen, onClose, onSave, selectedSlot, date }) => {
             onClick={onClose}
           />
           <div className="fixed top-[50px] right-0 h-full w-[50%] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out p-10">
-            <AddClient back={() => setAddClientModal(false)} setSelectedClient={setSelectedClient} />
+            <AddClient
+              back={() => setAddClientModal(false)}
+              setSelectedClient={(client) => {
+                setSelectedClient(client);
+                setCurrentStep('services');
+              }}
+            />
           </div>
 
         </div>
